@@ -26,10 +26,10 @@ namespace UniversityManager
             this.lastName = last;
             this.year = y;
             this.major = major;
-            this.classOne = one;
-            this.classTwo = two;
-            this.classThree = three;
-            this.classFour = four;
+            this.classOne = one.ToUpper();
+            this.classTwo = two.ToUpper();
+            this.classThree = three.ToUpper();
+            this.classFour = four.ToUpper();
         }
 
         public override string addToDatabase()

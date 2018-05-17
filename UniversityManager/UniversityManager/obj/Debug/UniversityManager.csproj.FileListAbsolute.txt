@@ -29,3 +29,5 @@ C:\Users\kaelb\source\repos\UniversityManager\UniversityManager\obj\Debug\Univer
 C:\Users\kaelb\source\repos\UniversityManager\UniversityManager\obj\Debug\UniversityManager.pdb
 C:\Users\kaelb\source\repos\UniversityManager\UniversityManager\obj\Debug\OutputWindow.g.cs
 C:\Users\kaelb\source\repos\UniversityManager\UniversityManager\obj\Debug\OutputWindow.baml
+C:\Users\kaelb\source\repos\UniversityManager\UniversityManager\obj\Debug\ClassPage.g.cs
+C:\Users\kaelb\source\repos\UniversityManager\UniversityManager\obj\Debug\ClassPage.baml

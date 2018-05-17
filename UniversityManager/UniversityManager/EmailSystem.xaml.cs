@@ -23,14 +23,20 @@ namespace UniversityManager
     {
 
         String user;
-        private String connectionString = "Data Source=KAELS-LENOVO-YO\\KB_SQLSERVER;Initial Catalog = KB_Database; Integrated Security = True";
+        private String connectionString = "Data Source=KAELS-LENOVO-YO\\KB_SQLSERVER;Initial Catalog=KB_Database;Integrated Security=True";
         int currentID;
+        int pID;
 
-        public EmailSystem(String username)
+        public EmailSystem(String username, int accessLevel, int pID)
         {
             this.user = username;
+            this.pID = pID;
             InitializeComponent();
             from.Text = username;
+            if (accessLevel == 1)
+            {
+                announcement.Visibility = Visibility.Visible;
+            }
 
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
@@ -68,7 +74,7 @@ namespace UniversityManager
                 Label from = new Label { Content = "From", Height = 50, Width = 200, FontWeight = FontWeights.ExtraBold };
                 Label subject1 = new Label { Content = "Subject", Height = 50, Width = 200, FontWeight = FontWeights.ExtraBold };
                 Label status = new Label { Content = "Status", Height = 50, Width = 200, FontWeight = FontWeights.ExtraBold };
-                
+
                 Button message;
                 Button reply;
 
@@ -100,7 +106,7 @@ namespace UniversityManager
                     {
                         Canvas email = new Canvas { Height = 50, Width = 1000 };
 
-                        id = new Label { Content = (reader["emailID"]).ToString(), Height = 50, Width = 200};
+                        id = new Label { Content = (reader["emailID"]).ToString(), Height = 50, Width = 200 };
                         from = new Label { Content = (string)reader["sender"], Height = 50, Width = 200 };
                         subject1 = new Label { Content = (string)reader["subject"], Height = 50, Width = 200 };
                         status = new Label { Content = (string)reader["status"], Height = 50, Width = 200 };
@@ -285,6 +291,8 @@ namespace UniversityManager
             {
                 //LOG OUT TAB
                 back.Visibility = System.Windows.Visibility.Visible;
+                annoucementText.Text = "";
+                courseCode.Text = "";
             }
         }
         private void forceSwitchTab(String s)
@@ -380,7 +388,7 @@ namespace UniversityManager
             }
         }
 
-        private void replyMessage (String sender, String sub)
+        private void replyMessage(String sender, String sub)
         {
             tabControl.SelectedItem = tabControl.Items[1];
             to.Text = sender;
@@ -400,6 +408,50 @@ namespace UniversityManager
             this.Hide();
             LoginWindow lw = new LoginWindow();
             lw.Show();
+        }
+
+        private void sendAnnouncement(object sender, RoutedEventArgs e)
+        {
+
+            if (courseCode.Text.Length >= 5 && annoucementText.Text.Length >= 5)
+            {
+                int result = -1;
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    conn.Open();
+                    SqlCommand command = new SqlCommand("UNI_MakeAnnouncement", conn);
+                    command.CommandType = System.Data.CommandType.StoredProcedure;
+
+                    SqlParameter param1 = new SqlParameter("@courseCode", System.Data.SqlDbType.VarChar);
+                    param1.Value = courseCode.Text;
+                    command.Parameters.Add(param1);
+
+                    SqlParameter param2 = new SqlParameter("@announcement", System.Data.SqlDbType.VarChar);
+                    param2.Value = annoucementText.Text;
+                    command.Parameters.Add(param2);
+
+                    SqlParameter param3 = new SqlParameter("@professorID", System.Data.SqlDbType.VarChar);
+                    param3.Value = this.pID;
+                    command.Parameters.Add(param3);
+
+                    var returnParameter = command.Parameters.Add("@ReturnVal", System.Data.SqlDbType.Int);
+                    returnParameter.Direction = System.Data.ParameterDirection.ReturnValue;
+
+                    command.ExecuteNonQuery();
+                    result = (int)returnParameter.Value;
+                    conn.Close();
+                }
+
+                switch (result)
+                {
+                    case 1:
+                        annoucementText.Text = "The professor is not teaching the class specified!";
+                        break;
+                    case 5:
+                        annoucementText.Text = "The announcement was sent successfully!";
+                        break;
+                }
+            }
         }
     }
 }

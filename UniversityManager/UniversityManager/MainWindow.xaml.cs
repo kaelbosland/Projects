@@ -23,21 +23,23 @@ namespace UniversityManager
     /// </summary>
     public partial class MainWindow : MetroWindow
     {
-        private String connectionString = "Data Source=KAELS-LENOVO-YO\\KB_SQLSERVER;Initial Catalog = KB_Database; Integrated Security = True";
+        private String connectionString = "Data Source=KAELS-LENOVO-YO\\KB_SQLSERVER;Initial Catalog=KB_Database;Integrated Security=True";
         int c = -1;
         int pIDCount = 1;
-        public static int accessLevel = -1;
-        private static int pID;
+        public int accessLevel = -1;
+        private int pID;
+        private string username;
 
         public const int STUDENT_ACCESS = 0;
         public const int PROF_ACCESS = 1;
         public const int ADMIN_ACCESS = 2;
 
 
-        public MainWindow(int access, int p)
+        public MainWindow(string username, int access, int p)
         {
-            accessLevel = access;
-            pID = p;
+            this.accessLevel = access;
+            this.pID = p;
+            this.username = username;
             InitializeComponent();
             TextBox[] studentQs = { q1, q2, q3, q4, q5, q6, q7, q8, q9, text1, text2, text3, text4, text5, text6, text7, text8, text9, choice, choice1 };
             setAllToSomething(studentQs, System.Windows.Visibility.Hidden);
@@ -52,7 +54,7 @@ namespace UniversityManager
                 returnParameter.Direction = System.Data.ParameterDirection.ReturnValue;
 
                 command.ExecuteNonQuery();
-                pIDCount = Convert.ToInt32(returnParameter.Value) + 1;
+                pIDCount = Convert.ToInt32(returnParameter.Value);
 
                 conn.Close();
             }
@@ -64,6 +66,8 @@ namespace UniversityManager
                     QuitButton.IsEnabled = false;
                     addPersonButton.IsEnabled = false;
                     SignUpProfButton.IsEnabled = false;
+                    classForm.Visibility = Visibility.Visible;
+
                     break;
                 case PROF_ACCESS:
                     dropButton.IsEnabled = false;
@@ -96,7 +100,7 @@ namespace UniversityManager
         private void switchForms(object sender, RoutedEventArgs e)
         {
             this.Hide();
-            OutputWindow w = new OutputWindow(accessLevel, pID);
+            OutputWindow w = new OutputWindow(this.username, accessLevel, pID);
             w.Show();
         }
 
@@ -129,15 +133,11 @@ namespace UniversityManager
             {
                 Student student = new Student(pIDCount, text2.Text, text3.Text, Int32.Parse(text4.Text), text5.Text, text6.Text, text7.Text, text8.Text, text9.Text);
                 results.Text = student.addToDatabase();
-                if (results.Text.Equals("The student was added succesfully!"))
-                    pIDCount++;
             }
             else if (c == 1)
             {
                 Professor prof = new Professor(pIDCount, text2.Text, text3.Text, text4.Text, text5.Text, text6.Text);
                 results.Text = prof.addToDatabase();
-                if (results.Text.Equals("The professor was added succesfully!"))
-                    pIDCount++;
             }
         }
 
@@ -276,7 +276,7 @@ namespace UniversityManager
                     command.Parameters.Add(pID);
 
                     SqlParameter coursecode = new SqlParameter("@coursecode", System.Data.SqlDbType.VarChar);
-                    coursecode.Value = text1.Text;
+                    coursecode.Value = text1.Text.ToUpper();
                     command.Parameters.Add(coursecode);
 
                     var returnParameter = command.Parameters.Add("@ReturnVal", System.Data.SqlDbType.Int);
@@ -437,6 +437,20 @@ namespace UniversityManager
         private void completedFormStudent(object sender, RoutedEventArgs e)
         {
             submitButton.Visibility = System.Windows.Visibility.Visible;
+        }
+
+        private void showClassPage(object sender, RoutedEventArgs e)
+        {
+            ClassPage cp = new ClassPage(pID);
+            cp.Show();
+            this.Hide();
+        }
+
+        private void switchEmail(object sender, RoutedEventArgs e)
+        {
+            EmailSystem es = new EmailSystem(this.username, this.accessLevel, this.pID);
+            es.Show();
+            this.Hide();
         }
     }
 }

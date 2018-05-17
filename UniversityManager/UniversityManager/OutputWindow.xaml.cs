@@ -23,20 +23,22 @@ namespace UniversityManager
     public partial class OutputWindow : MetroWindow
     {
 
-        private String connectionString = "Data Source=KAELS-LENOVO-YO\\KB_SQLSERVER;Initial Catalog = KB_Database; Integrated Security = True";
+        private String connectionString = "Data Source=KAELS-LENOVO-YO\\KB_SQLSERVER;Initial Catalog=KB_Database;Integrated Security=True";
         int c = -1;
         List<Student> students = new List<Student>();
         List<Professor> profs = new List<Professor>();
 
         private static int accessLevel;
         private static int pid;
+        private string username;
 
         String table;
         List<String> columns = new List<string>();
 
-        public OutputWindow(int access, int p)
+        public OutputWindow(string username, int access, int p)
         {
             InitializeComponent();
+            this.username = username;
             accessLevel = access;
             pid = p;
             if (accessLevel == 0) //student
@@ -67,7 +69,7 @@ namespace UniversityManager
         private void switchForms(object sender, RoutedEventArgs e)
         {
             this.Hide();
-            MainWindow mw = new MainWindow(accessLevel, pid);
+            MainWindow mw = new MainWindow(this.username, accessLevel, pid);
             mw.ShowDialog();
         }
 
@@ -117,6 +119,8 @@ namespace UniversityManager
                     c += columns[i] + ", ";
                 }
             }
+
+
 
             String query = "SELECT * FROM " + table;
             try
@@ -377,7 +381,7 @@ namespace UniversityManager
                     }
                     break;
                 case "Program":
-                    attributes = new List<String> { "programName", "programName", "department" };
+                    attributes = new List<String> { "programName", "programLength", "department" };
                     for (int i = 0; i < attributes.Count; i++)
                     {
                         MenuItem a = new MenuItem { Header = attributes[i] };

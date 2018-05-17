@@ -19,12 +19,19 @@
                 <Grid Background="#FFE5E5E5"/>
             </TabItem>
             <TabItem x:Name="sentFolder" Header="SentMail" HorizontalAlignment="Left" Height="39" VerticalAlignment="Top" Width="127" Margin="0.333,0,-19.333,-0.333">
+                <Grid Background="#FFE5E5E5">
+                </Grid>
+            </TabItem>
+            <TabItem Header="Logout" Height="39" VerticalAlignment="Top" Margin="269,0,-280,0">
                 <Grid Background="#FFE5E5E5"/>
             </TabItem>
-            <TabItem Header="Logout" Height="39" VerticalAlignment="Top" Margin="-10,0,-0.667,-0.333">
-                <Grid Background="#FFE5E5E5"/>
+            <TabItem x:Name="announcement" Header="Make Announcement" Height="39" VerticalAlignment="Top" Margin="-104,0,93,0" >
+                <Grid Background="#FFE5E5E5">
+                    <TextBox x:Name="annoucementText" HorizontalAlignment="Left" controls:TextBoxHelper.Watermark="Announcement" FontSize="18" Height="209" TextWrapping="Wrap" VerticalAlignment="Top" Width="400" Margin="298,172,0,0"/>
+                    <TextBox x:Name="courseCode"  controls:TextBoxHelper.Watermark="CourseCode" FontSize="20" HorizontalAlignment="Left" Height="40" TextWrapping="Wrap" VerticalAlignment="Top" Width="158" Margin="298,78,0,0"/>
+                    <controls:Tile x:Name="submit" Content="SEND" Height="Auto" Width="Auto" FontSize="25" Margin="541,78,294,220" Click="sendAnnouncement" Visibility="Visible"/>
+                </Grid>
             </TabItem>
-
 
         </controls:MetroTabControl>
 

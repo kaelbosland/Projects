@@ -33,15 +33,17 @@
         <TextBox x:Name="q7" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="92" Margin="274,217,0,0" IsEnabled="False" FontFamily="Calibri" />
         <TextBox x:Name="q8" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="92" Margin="274,245,0,0" IsEnabled="False" FontFamily="Calibri"/>
         <TextBox x:Name="q9" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="92" Margin="274,273,0,0" IsEnabled="False" FontFamily="Calibri"/>
-        <Button x:Name="submitButton" Content="Submit Data" HorizontalAlignment="Left" VerticalAlignment="Top" Width="92" Margin="555,283,0,0" Click="submit"  Visibility="Visible" Height="32" FontFamily="Calibri"/>
+        <Button x:Name="submitButton" Content="Submit Data" HorizontalAlignment="Left" VerticalAlignment="Top" Width="105" Margin="542,283,0,0" Click="submit"  Visibility="Visible" Height="32" FontFamily="Calibri"/>
         <TextBox x:Name="choice1" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" Text="Student or Professor:" VerticalAlignment="Top" Width="127" RenderTransformOrigin="2.273,1.226" Margin="274,13,0,0" FontFamily="Calibri"/>
         <TextBox x:Name="results" HorizontalAlignment="Left" Height="128" TextWrapping="Wrap" VerticalAlignment="Top" Width="245" Margin="0,197,0,0" FontFamily="Calibri"/>
         <Button x:Name="enrollButton" Content="Enroll Student in Class" HorizontalAlignment="Left" VerticalAlignment="Top" Width="245" Margin="2,53,0,0" Height="25" Click="enrollStudent" FontFamily="Calibri" />
         <Button x:Name="SignUpProfButton" Content="Sign Up Prof to Teach Class" HorizontalAlignment="Left" VerticalAlignment="Top" Width="245" Margin="2,78,0,0" Height="25" Click="signUpProf" FontFamily="Calibri" />
         <Button x:Name="dropButton" Content="Drop Class (Student)" HorizontalAlignment="Left" VerticalAlignment="Top" Width="245" Margin="2,103,0,0" Height="25" Click="dropClass" FontFamily="Calibri" />
         <Button x:Name="QuitButton" Content="Quit Teaching Class (Professor)" HorizontalAlignment="Left" VerticalAlignment="Top" Width="245" Margin="2,128,0,0" Height="25" Click="quitTeaching" FontFamily="Calibri" />
-        <Button x:Name="switch" Content="Switch Forms" HorizontalAlignment="Left" VerticalAlignment="Top" Width="92" Margin="555,8,0,0" Click="switchForms"  Visibility="Visible" Height="32" FontFamily="Calibri"/>
-        <Button x:Name="backButton" Content="Back to Login" HorizontalAlignment="Left" VerticalAlignment="Top" Width="92" Margin="555,40,0,0" Click="back"  Visibility="Visible" Height="32" FontFamily="Calibri"/>
+        <Button x:Name="switch" Content="Go To Output Form" HorizontalAlignment="Left" VerticalAlignment="Top" Width="105" Margin="542,8,0,0" Click="switchForms"  Visibility="Visible" Height="32" FontFamily="Calibri"/>
+        <Button x:Name="backButton" Content="Back to Login" HorizontalAlignment="Left" VerticalAlignment="Top" Width="105" Margin="542,118,0,0" Click="back"  Visibility="Visible" Height="32" FontFamily="Calibri"/>
+        <Button x:Name="classForm" Content="Go To Class Page" HorizontalAlignment="Left" Visibility="Hidden" VerticalAlignment="Top" Width="105" Margin="542,44,0,0" Click="showClassPage" Height="32" FontFamily="Calibri" />
+        <Button x:Name="email" Content="Go To Email" HorizontalAlignment="Left" VerticalAlignment="Top" Width="105" Margin="542,81,0,0" Click="switchEmail"  Visibility="Visible" Height="32" FontFamily="Calibri"/>
 
     </Grid>
 </controls:MetroWindow>

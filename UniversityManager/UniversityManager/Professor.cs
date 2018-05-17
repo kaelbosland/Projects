@@ -22,8 +22,8 @@ namespace UniversityManager
             this.firstName = first;
             this.lastName = last;
             this.department = dept;
-            this.classOne = one;
-            this.classTwo = two;
+            this.classOne = one.ToUpper();
+            this.classTwo = two.ToUpper();
         }
 
         public override string addToDatabase()

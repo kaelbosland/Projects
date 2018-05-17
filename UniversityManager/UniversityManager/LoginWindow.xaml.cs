@@ -25,7 +25,8 @@ namespace UniversityManager
 
         //0 = student, 1 = prof, 2 = admin!
         public int identity = -1;
-        private String connectionString = "Data Source=KAELS-LENOVO-YO\\KB_SQLSERVER;Initial Catalog = KB_Database; Integrated Security = True";
+        private String connectionString = "Data Source=KAELS-LENOVO-YO\\KB_SQLSERVER;Initial Catalog=KB_Database;Integrated Security=True";
+
         public LoginWindow()
         {
             InitializeComponent();
@@ -110,13 +111,13 @@ namespace UniversityManager
                             this.Hide();
                             if (c == 0)
                             {
-                                MainWindow mw = new MainWindow(this.identity, Convert.ToInt32(pID.Text));
+                                MainWindow mw = new MainWindow(this.username.Text, this.identity, Convert.ToInt32(pID.Text));
                                 mw.results.Text = "Login Successful! Welcome.";
                                 mw.Show();
                             }
                             else if (c == 1)
                             {
-                                EmailSystem es = new EmailSystem(this.username.Text);
+                                EmailSystem es = new EmailSystem(this.username.Text, this.identity, Convert.ToInt32(pID.Text));
                                 //es.results.Text = "Login Successful! Welcome.";
                                 es.Show();
                             }
