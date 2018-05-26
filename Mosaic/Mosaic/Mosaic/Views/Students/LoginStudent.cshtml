@@ -1,0 +1,30 @@
+﻿@model  Mosaic.Models.Student
+
+@{
+    ViewData["Title"] = "LoginStudent";
+}
+
+<h2>Login</h2>
+
+<h4>Student</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="LoginStudent">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Username" class="control-label"></label>
+                <input asp-for="Username"  value="boslandk" class="form-control" required/>
+                <span asp-validation-for="Username" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Password" class="control-label"></label>
+                <input asp-for="Password"  value="password" class="form-control" type="password" required/>
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Login" class="btn btn-default" />
+            </div>
+        </form>
+    </div>
+</div>

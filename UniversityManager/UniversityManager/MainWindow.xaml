@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:UniversityManager"
         xmlns:controls="http://metro.mahapps.com/winfx/xaml/controls"
         mc:Ignorable="d"
-        Title="Kael's University Manager - Input Page" Height="354.744" Width="665.15" GlowBrush="{DynamicResource AccentColorBrush}" >
+        Title="Kael's University Manager - Input Page" Height="363.455" Width="683.541" GlowBrush="{DynamicResource AccentColorBrush}" >
     <Grid Margin="0,0,2,0">
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
