@@ -11,8 +11,8 @@ namespace Mosaic.Services
     public class StudentAuthentication : IStudentAuthentication
     {
 
-        private readonly LoginSystemContext _context;
-        public StudentAuthentication (LoginSystemContext context)
+        private readonly Models.MosaicContext _context;
+        public StudentAuthentication (Models.MosaicContext context)
         {
             this._context = context;
         }

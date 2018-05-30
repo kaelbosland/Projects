@@ -42,7 +42,7 @@ namespace Mosaic
             });
 
             var connection = @"Data Source=KAELS-LENOVO-YO\KB_SQLSERVER;Initial Catalog=Mosaic;Integrated Security=True";
-            services.AddDbContext<LoginSystemContext>(options => options.UseSqlServer(connection));
+            services.AddDbContext<MosaicContext>(options => options.UseSqlServer(connection));
             services.AddScoped<IStudentAuthentication, StudentAuthentication>();
             services.AddScoped<IProfAuthentication, ProfAuthentication> ();
         }

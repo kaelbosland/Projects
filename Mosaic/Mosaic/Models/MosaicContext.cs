@@ -4,20 +4,28 @@ using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace Mosaic.Models
 {
-    public partial class LoginSystemContext : DbContext
+    public partial class MosaicContext : DbContext
     {
         public virtual DbSet<Class> Class { get; set; }
+        public virtual DbSet<Email> Email { get; set; }
         public virtual DbSet<Professor> Professor { get; set; }
         public virtual DbSet<Student> Student { get; set; }
 
-        public LoginSystemContext(DbContextOptions<LoginSystemContext> options) : base(options)
+        public MosaicContext(DbContextOptions<MosaicContext> options) : base(options)
         {
-          
+
+        }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            if (!optionsBuilder.IsConfigured)
+            {
+                optionsBuilder.UseSqlServer(@"Data Source=KAELS-LENOVO-YO\KB_SQLSERVER;Initial Catalog=MosaicContext;Integrated Security=True");
+            }
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-
             modelBuilder.Entity<Class>(entity =>
             {
                 entity.HasKey(e => e.ClassCode);
@@ -29,8 +37,9 @@ namespace Mosaic.Models
                     .ValueGeneratedNever();
 
                 entity.Property(e => e.ClassName)
+                    .IsRequired()
                     .HasColumnName("className")
-                    .HasMaxLength(20)
+                    .HasMaxLength(30)
                     .IsUnicode(false);
 
                 entity.Property(e => e.MaxEnroll).HasColumnName("maxEnroll");
@@ -38,9 +47,42 @@ namespace Mosaic.Models
                 entity.Property(e => e.NumEnrolled).HasColumnName("numEnrolled");
 
                 entity.Property(e => e.ProfessorId)
-                .HasColumnName("professorID")
-                .HasMaxLength(20)
-                .IsUnicode(false);
+                    .HasColumnName("professorID")
+                    .HasMaxLength(20)
+                    .IsUnicode(false);
+            });
+
+            modelBuilder.Entity<Email>(entity =>
+            {
+                entity.Property(e => e.Id).HasColumnName("ID");
+
+                entity.Property(e => e.Message)
+                    .IsRequired()
+                    .HasColumnName("message")
+                    .IsUnicode(false);
+
+                entity.Property(e => e.Reciever)
+                    .IsRequired()
+                    .HasColumnName("reciever")
+                    .HasMaxLength(20)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.Sender)
+                    .IsRequired()
+                    .HasColumnName("sender")
+                    .HasMaxLength(20)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.Status)
+                    .IsRequired()
+                    .HasColumnName("status")
+                    .HasMaxLength(30)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.Subject)
+                    .HasColumnName("subject")
+                    .HasMaxLength(100)
+                    .IsUnicode(false);
             });
 
             modelBuilder.Entity<Professor>(entity =>
@@ -73,13 +115,13 @@ namespace Mosaic.Models
                 entity.Property(e => e.Password)
                     .IsRequired()
                     .HasColumnName("password")
-                    .HasMaxLength(20)
+                    .HasMaxLength(148)
                     .IsUnicode(false);
 
                 entity.HasOne(d => d.ClassOneNavigation)
                     .WithMany(p => p.Professor)
                     .HasForeignKey(d => d.ClassOne)
-                    .HasConstraintName("FK__Professor__class__06CD04F7");
+                    .HasConstraintName("FK_Professor_Class");
             });
 
             modelBuilder.Entity<Student>(entity =>
@@ -117,18 +159,18 @@ namespace Mosaic.Models
                 entity.Property(e => e.Password)
                     .IsRequired()
                     .HasColumnName("password")
-                    .HasMaxLength(20)
+                    .HasMaxLength(148)
                     .IsUnicode(false);
 
                 entity.HasOne(d => d.ClassOneNavigation)
                     .WithMany(p => p.StudentClassOneNavigation)
                     .HasForeignKey(d => d.ClassOne)
-                    .HasConstraintName("FK__Student__classOn__04E4BC85");
+                    .HasConstraintName("FK_User_User");
 
                 entity.HasOne(d => d.ClassTwoNavigation)
                     .WithMany(p => p.StudentClassTwoNavigation)
                     .HasForeignKey(d => d.ClassTwo)
-                    .HasConstraintName("FK__Student__classTw__05D8E0BE");
+                    .HasConstraintName("FK_User_Class");
             });
         }
     }

@@ -9,85 +9,85 @@ using Mosaic.Models;
 
 namespace Mosaic.Controllers
 {
-    public class ClassesController : Controller
+    public class EmailsController : Controller
     {
-        private readonly Models.MosaicContext _context;
+        private readonly MosaicContext _context;
 
-        public ClassesController(Models.MosaicContext context)
+        public EmailsController(MosaicContext context)
         {
             _context = context;
         }
 
-        // GET: Classes
+        // GET: Emails
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Class.ToListAsync());
+            return View(await _context.Email.ToListAsync());
         }
 
-        // GET: Classes/Details/5
-        public async Task<IActionResult> Details(string id)
+        // GET: Emails/Details/5
+        public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var @class = await _context.Class
-                .SingleOrDefaultAsync(m => m.ClassCode == id);
-            if (@class == null)
+            var email = await _context.Email
+                .SingleOrDefaultAsync(m => m.Id == id);
+            if (email == null)
             {
                 return NotFound();
             }
 
-            return View(@class);
+            return View(email);
         }
 
-        // GET: Classes/Create
+        // GET: Emails/Create
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: Classes/Create
+        // POST: Emails/Create
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ClassCode,ClassName,NumEnrolled,MaxEnroll,ProfessorId")] Class @class)
+        public async Task<IActionResult> Create([Bind("Id,Sender,Reciever,Subject,Message,Status")] Email email)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(@class);
+                _context.Add(email);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(@class);
+            return View(email);
         }
 
-        // GET: Classes/Edit/5
-        public async Task<IActionResult> Edit(string id)
+        // GET: Emails/Edit/5
+        public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var @class = await _context.Class.SingleOrDefaultAsync(m => m.ClassCode == id);
-            if (@class == null)
+            var email = await _context.Email.SingleOrDefaultAsync(m => m.Id == id);
+            if (email == null)
             {
                 return NotFound();
             }
-            return View(@class);
+            return View(email);
         }
 
-        // POST: Classes/Edit/5
+        // POST: Emails/Edit/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string id, [Bind("ClassCode,ClassName,NumEnrolled,MaxEnroll,ProfessorId")] Class @class)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Sender,Reciever,Subject,Message,Status")] Email email)
         {
-            if (id != @class.ClassCode)
+            if (id != email.Id)
             {
                 return NotFound();
             }
@@ -96,12 +96,12 @@ namespace Mosaic.Controllers
             {
                 try
                 {
-                    _context.Update(@class);
+                    _context.Update(email);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ClassExists(@class.ClassCode))
+                    if (!EmailExists(email.Id))
                     {
                         return NotFound();
                     }
@@ -112,41 +112,41 @@ namespace Mosaic.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(@class);
+            return View(email);
         }
 
-        // GET: Classes/Delete/5
-        public async Task<IActionResult> Delete(string id)
+        // GET: Emails/Delete/5
+        public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var @class = await _context.Class
-                .SingleOrDefaultAsync(m => m.ClassCode == id);
-            if (@class == null)
+            var email = await _context.Email
+                .SingleOrDefaultAsync(m => m.Id == id);
+            if (email == null)
             {
                 return NotFound();
             }
 
-            return View(@class);
+            return View(email);
         }
 
-        // POST: Classes/Delete/5
+        // POST: Emails/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(string id)
+        public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var @class = await _context.Class.SingleOrDefaultAsync(m => m.ClassCode == id);
-            _context.Class.Remove(@class);
+            var email = await _context.Email.SingleOrDefaultAsync(m => m.Id == id);
+            _context.Email.Remove(email);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool ClassExists(string id)
+        private bool EmailExists(int id)
         {
-            return _context.Class.Any(e => e.ClassCode == id);
+            return _context.Email.Any(e => e.Id == id);
         }
     }
 }

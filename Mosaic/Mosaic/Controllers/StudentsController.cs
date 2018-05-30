@@ -13,10 +13,10 @@ namespace Mosaic.Controllers
 {
     public class StudentsController : Controller
     {
-        private readonly LoginSystemContext _context;
+        private readonly Models.MosaicContext _context;
         private readonly IStudentAuthentication _service;
 
-        public StudentsController(LoginSystemContext context, IStudentAuthentication service)
+        public StudentsController(Models.MosaicContext context, IStudentAuthentication service)
         {
             _context = context;
             _service = service;

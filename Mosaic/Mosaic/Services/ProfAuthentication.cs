@@ -10,9 +10,9 @@ namespace Mosaic.Services
 {
     public class ProfAuthentication : IProfAuthentication
     {
-        private readonly LoginSystemContext _context;
+        private readonly Models.MosaicContext _context;
 
-        public ProfAuthentication (LoginSystemContext context)
+        public ProfAuthentication (Models.MosaicContext context)
         {
             _context = context;
         }
