@@ -24,3 +24,5 @@ C:\Users\kaelb\source\repos\Mosaic\Mosaic\obj\Debug\netcoreapp2.0\Mosaic.Assembl
 C:\Users\kaelb\source\repos\Mosaic\Mosaic\obj\Debug\netcoreapp2.0\Mosaic.csproj.CopyComplete
 C:\Users\kaelb\source\repos\Mosaic\Mosaic\obj\Debug\netcoreapp2.0\Mosaic.dll
 C:\Users\kaelb\source\repos\Mosaic\Mosaic\obj\Debug\netcoreapp2.0\Mosaic.pdb
+C:\Users\kaelb\source\repos\Mosaic\Mosaic\bin\Debug\netcoreapp2.0\System.Web.Http.dll
+C:\Users\kaelb\source\repos\Mosaic\Mosaic\bin\Debug\netcoreapp2.0\System.Net.Http.Formatting.dll

@@ -15,11 +15,38 @@ namespace Mosaic.Controllers
     {
         private readonly Models.MosaicContext _context;
         private readonly IProfAuthentication _service;
+        private readonly IEmailAuthentication _emailService;
 
-        public ProfessorsController(Models.MosaicContext context, IProfAuthentication service)
+        public ProfessorsController(Models.MosaicContext context, IProfAuthentication service, IEmailAuthentication emailService)
         {
             _context = context;
             _service = service;
+            _emailService = emailService;
+        }
+
+        //GET: Professors/EmailLogin
+        public IActionResult EmailLogin()
+        {
+            return View();
+        }
+
+        //POST: Professors/EmailLogin
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EmailLogin(string password)
+        {
+            if (_emailService.AllowLogin(HttpContext.Session.GetString("username"), password, (int) HttpContext.Session.GetInt32("type")))
+            {
+                return RedirectToAction("EmailMenu");
+            }
+
+            return RedirectToAction("EmailLogin");
+        }
+
+        //GET: Professors/EmailMenu
+        public IActionResult EmailMenu()
+        {
+            return View();
         }
 
         //GET: Students/ChangePassword

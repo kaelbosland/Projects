@@ -6,16 +6,43 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Mosaic.Models;
+using Microsoft.AspNetCore.Http;
+using Mosaic.Services;
+
 
 namespace Mosaic.Controllers
 {
     public class EmailsController : Controller
     {
         private readonly MosaicContext _context;
+        private readonly IEmailAuthentication _service;
 
-        public EmailsController(MosaicContext context)
+        public EmailsController(MosaicContext context, IEmailAuthentication service)
         {
             _context = context;
+            _service = service;
+        }
+
+        //GET: Emails/EmailLogin
+        public IActionResult EmailLogin ()
+        {
+            if (HttpContext.Session.GetInt32("type") == 0)
+            {
+                RedirectToAction("EmailLogin", "Students");
+            } else if (HttpContext.Session.GetInt32("type") == 1)
+            {
+                RedirectToAction("EmailLogin", "Professor");
+            }
+
+            return View();
+        }
+
+        //POST: Emails/EmailLogin
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EmailLogin(string username, string password)
+        {
+            return View();
         }
 
         // GET: Emails

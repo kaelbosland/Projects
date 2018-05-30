@@ -45,6 +45,7 @@ namespace Mosaic
             services.AddDbContext<MosaicContext>(options => options.UseSqlServer(connection));
             services.AddScoped<IStudentAuthentication, StudentAuthentication>();
             services.AddScoped<IProfAuthentication, ProfAuthentication> ();
+            services.AddScoped<IEmailAuthentication, EmailAuthentication>();
         }
 
 

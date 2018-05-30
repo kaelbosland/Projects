@@ -15,11 +15,38 @@ namespace Mosaic.Controllers
     {
         private readonly Models.MosaicContext _context;
         private readonly IStudentAuthentication _service;
+        private readonly IEmailAuthentication _emailService;
 
-        public StudentsController(Models.MosaicContext context, IStudentAuthentication service)
+        public StudentsController(Models.MosaicContext context, IStudentAuthentication service, IEmailAuthentication emailService)
         {
             _context = context;
             _service = service;
+            _emailService = emailService;
+        }
+
+        //GET: Students/EmailLogin
+        public IActionResult EmailLogin()
+        {
+            return View();
+        }
+
+        //POST: Students/EmailLogin
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult EmailLogin(string username, string password)
+        {
+            if (_emailService.AllowLogin(HttpContext.Session.GetString("username"), password, (int)HttpContext.Session.GetInt32("type")))
+            {
+                return RedirectToAction("EmailMenu");
+            }
+
+            return RedirectToAction("EmailLogin");
+        }
+
+        //GET: Students/EmailMenu
+        public IActionResult EmailMenu ()
+        {
+            return View();
         }
 
         //GET: Students/CannotEnroll

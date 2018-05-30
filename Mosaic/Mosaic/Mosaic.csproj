@@ -17,6 +17,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Reference Include="System.Web.Http">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\IDE\CommonExtensions\Microsoft\TeamFoundation\Team Explorer\System.Web.Http.dll</HintPath>
+    </Reference>
     <Reference Include="System.Web.Mvc">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\IDE\CommonExtensions\Microsoft\Web\Razor\v3.0\MVC5.0\System.Web.Mvc.dll</HintPath>
     </Reference>
