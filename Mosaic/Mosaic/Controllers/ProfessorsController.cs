@@ -4,18 +4,176 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Mosaic.Models;
+using Mosaic.Services;
 
 namespace Mosaic.Controllers
 {
     public class ProfessorsController : Controller
     {
         private readonly LoginSystemContext _context;
+        private readonly IProfAuthentication _service;
 
-        public ProfessorsController(LoginSystemContext context)
+        public ProfessorsController(LoginSystemContext context, IProfAuthentication service)
         {
             _context = context;
+            _service = service;
+        }
+
+        //GET: Students/ChangePassword
+        public IActionResult ChangePassword()
+        {
+            ViewData["Username"] = HttpContext.Session.GetString("username");
+            return View();
+        }
+
+        //POST: Students/ChangePassword
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangePassword(string oldPass, string newPass, string username)
+        {
+            var professor = _service.VerifyChangePassword(username, oldPass, newPass);
+            ViewData["Username"] = HttpContext.Session.GetString("username");
+
+            if (professor != null)
+            {
+                _context.Professor.Update(professor);
+                await _context.SaveChangesAsync();
+                ViewData["ErrorMessage"] = "Password change was successful.";
+                return View();
+            }
+            else
+            {
+                ViewData["ErrorMessage"] = "Incorrect password, change password attempt failed.";
+                return View();
+            }
+
+        }
+
+        //GET: Professors/TeachAClass
+        public IActionResult TeachAClass()
+        {
+            var professor = _context.Professor.SingleOrDefault(m => m.Username == HttpContext.Session.GetString("username"));
+            var classList = _context.Class.ToList();
+
+            for (int i = 0; i < classList.Count; i++)
+            {
+                if (classList[i].ProfessorId != null)
+                {
+                    classList.Remove(classList[i]);
+                }
+            }
+
+            ViewData["ClassOne"] = professor.ClassOne;
+            ViewData["Classes"] = classList;
+
+            return View();
+        }
+
+        // POST: Professors/TeachAClass
+        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
+        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> TeachAClass(string classCode)
+        {
+            var professor = await _context.Professor.SingleOrDefaultAsync(m => m.Username == HttpContext.Session.GetString("username"));
+            var classList = _context.Class.ToList();
+            var chosenClass = await _context.Class.SingleOrDefaultAsync(m => m.ClassCode == classCode);
+
+            for (int i = 0; i < classList.Count; i++)
+            {
+                if (classList[i].ProfessorId != null)
+                {
+                    classList.Remove(classList[i]);
+                }
+            }
+
+            ViewData["ClassOne"] = professor.ClassOne;
+            ViewData["Classes"] = classList;
+
+            professor.ClassOne = classCode.ToUpper();
+            chosenClass.ProfessorId = professor.Username;
+
+            _context.Professor.Update(professor);
+            _context.Class.Update(chosenClass);
+            await _context.SaveChangesAsync();
+            return RedirectToAction("TeachAClass");
+        }
+
+        //GET: Professors/DropTeachingAClass
+        public IActionResult DropTeachingAClass()
+        {
+            var professor = _context.Professor.SingleOrDefault(m => m.Username ==  HttpContext.Session.GetString("username"));
+            var classList = _context.Class.ToList();
+
+            ViewData["ClassOne"] = professor.ClassOne;
+            ViewData["Classes"] = classList;
+
+            return View();
+        }
+
+        //POST: Professors/DropTeachingAClass
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DropTeachingAClass(string classCode)
+        {
+            var professor = await _context.Professor.SingleOrDefaultAsync(m => m.Username == HttpContext.Session.GetString("username"));
+            var classList = _context.Class.ToList();
+            var chosenClass = await _context.Class.SingleOrDefaultAsync(m => m.ClassCode == classCode);
+
+            ViewData["ClassOne"] = professor.ClassOne;
+            ViewData["Classes"] = classList;
+
+            professor.ClassOne = null;
+            chosenClass.ProfessorId = null;
+
+            _context.Professor.Update(professor);
+            _context.Class.Update(chosenClass);
+            await _context.SaveChangesAsync();
+            return RedirectToAction("DropTeachingAClass");
+        }
+
+        //GET: Professors/Menu
+        public IActionResult Menu()
+        {
+            return View();
+        }
+
+        public IActionResult Logout()
+        {
+            HttpContext.Session.SetString("username", "");
+            HttpContext.Session.SetInt32("type", -1);
+            return RedirectToAction("Home");
+        }
+
+        // GET: Professors/LoginProf
+        public IActionResult LoginProf()
+        {
+            ViewData["Users"] = _context.Professor.ToList();
+            return View();
+        }
+
+        // POST: Professors/LoginProf
+        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
+        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> LoginProf(string username, string password)
+        {
+            ViewData["Users"] = _context.Professor.ToList();
+            if (_service.AllowLogin(username, password))
+            {
+                HttpContext.Session.SetString("username", username);
+                HttpContext.Session.SetInt32("type", 1);
+                return RedirectToAction("Menu");
+            }
+            else
+            {
+                return NotFound();
+            }
         }
 
         // GET: Professors
@@ -25,29 +183,23 @@ namespace Mosaic.Controllers
             return View(await loginSystemContext.ToListAsync());
         }
 
-        // GET: Professors/Details/5
-        public async Task<IActionResult> Details(string id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var professor = await _context.Professor
-                .Include(p => p.ClassOneNavigation)
-                .SingleOrDefaultAsync(m => m.Username == id);
-            if (professor == null)
-            {
-                return NotFound();
-            }
-
-            return View(professor);
-        }
-
         // GET: Professors/CreateProf
         public IActionResult CreateProf()
         {
-            ViewData["ClassOne"] = new SelectList(_context.Class, "ClassCode", "ClassCode");
+            HttpContext.Session.SetString("username", "");
+            var items1 = _context.Class.ToList();
+            for (int i = 0; i < items1.Count; i++)
+            {
+                if (items1[i].ProfessorId != null)
+                {
+                    items1.Remove(items1[i]);
+                }
+            }
+
+            items1.Insert(0, new Class { ClassCode = "" });
+
+            ViewData["ClassOne"] = new SelectList(items1, "ClassCode", "ClassCode", string.Empty);
+            ViewData["Usernames"] = _context.Student.ToList();
             return View();
         }
 
@@ -58,51 +210,66 @@ namespace Mosaic.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateProf([Bind("Username,Password,FirstName,LastName,ClassOne")] Professor professor)
         {
-            if (ModelState.IsValid)
+            var items1 = _context.Class.ToList();
+            for (int i = 0; i < items1.Count; i++)
             {
-                _context.Add(professor);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                if (items1[i].ProfessorId != null)
+                {
+                    items1.Remove(items1[i]);
+                }
             }
-            ViewData["ClassOne"] = new SelectList(_context.Class, "ClassCode", "ClassCode", professor.ClassOne);
-            return View(professor);
+
+            items1.Insert(0, new Class { ClassCode = "" });
+
+            ViewData["ClassOne"] = new SelectList(items1, "ClassCode", "ClassCode", string.Empty);
+            ViewData["Usernames"] = _context.Student.ToList();
+
+            var classOne = await _context.Class.SingleOrDefaultAsync(m => m.ClassCode == professor.ClassOne);
+            if (classOne != null) { classOne.ProfessorId = professor.Username; _context.Update(classOne); } else { professor.ClassOne = null; }
+            professor.Password = _service.EncryptPassword(professor.Password);
+            _context.Add(professor);
+            await _context.SaveChangesAsync();
+            ModelState.Clear();
+
+            return RedirectToAction("LoginProf");
         }
 
-        // GET: Professors/Edit/5
-        public async Task<IActionResult> Edit(string id)
+        // GET: Professors/Edit
+        public async Task<IActionResult> Edit()
         {
+            String id = HttpContext.Session.GetString("username");
             if (id == null)
             {
                 return NotFound();
             }
 
             var professor = await _context.Professor.SingleOrDefaultAsync(m => m.Username == id);
+            ViewData["Professor"] = professor; 
             if (professor == null)
             {
                 return NotFound();
             }
-            ViewData["ClassOne"] = new SelectList(_context.Class, "ClassCode", "ClassCode", professor.ClassOne);
+            
             return View(professor);
         }
-
-        // POST: Professors/Edit/5
+    
+        // POST: Professors/Edit
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(string id, [Bind("Username,Password,FirstName,LastName,ClassOne")] Professor professor)
         {
-            if (id != professor.Username)
-            {
-                return NotFound();
-            }
-
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _context.Update(professor);
-                    await _context.SaveChangesAsync();
+                    ViewData["Professor"] = professor;
+                    if (professor.Password != null)
+                    {
+                        _context.Update(professor);
+                        await _context.SaveChangesAsync();
+                    }
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -115,23 +282,23 @@ namespace Mosaic.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
+                
             }
-            ViewData["ClassOne"] = new SelectList(_context.Class, "ClassCode", "ClassCode", professor.ClassOne);
             return View(professor);
         }
 
-        // GET: Professors/Delete/5
-        public async Task<IActionResult> Delete(string id)
+        // GET: Professors/Delete
+        public async Task<IActionResult> Delete()
         {
+            string id = HttpContext.Session.GetString("username");
+
             if (id == null)
             {
                 return NotFound();
             }
 
-            var professor = await _context.Professor
-                .Include(p => p.ClassOneNavigation)
-                .SingleOrDefaultAsync(m => m.Username == id);
+            var professor = await _context.Professor.SingleOrDefaultAsync(m => m.Username == id);
+
             if (professor == null)
             {
                 return NotFound();
@@ -140,15 +307,20 @@ namespace Mosaic.Controllers
             return View(professor);
         }
 
-        // POST: Professors/Delete/5
+        // POST: Professors/Delete
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(string id)
+        public async Task<IActionResult> DeleteConfirmed()
         {
+            string id = HttpContext.Session.GetString("username");
+
             var professor = await _context.Professor.SingleOrDefaultAsync(m => m.Username == id);
+            var classOne = await _context.Class.SingleOrDefaultAsync(m => m.ClassCode == professor.ClassOne);
+            classOne.ProfessorId = null;
             _context.Professor.Remove(professor);
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            HttpContext.Session.SetString("username", "");
+            return RedirectToAction("Home", "Students");
         }
 
         private bool ProfessorExists(string id)

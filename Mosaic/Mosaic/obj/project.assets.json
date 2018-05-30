@@ -13252,11 +13252,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\kaelb\\source\\repos\\Mosaic\\Mosaic\\Mosaic\\Mosaic.csproj",
+      "projectUniqueName": "C:\\Users\\kaelb\\source\\repos\\Mosaic\\Mosaic\\Mosaic.csproj",
       "projectName": "Mosaic",
-      "projectPath": "C:\\Users\\kaelb\\source\\repos\\Mosaic\\Mosaic\\Mosaic\\Mosaic.csproj",
+      "projectPath": "C:\\Users\\kaelb\\source\\repos\\Mosaic\\Mosaic\\Mosaic.csproj",
       "packagesPath": "C:\\Users\\kaelb\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\kaelb\\source\\repos\\Mosaic\\Mosaic\\Mosaic\\obj\\",
+      "outputPath": "C:\\Users\\kaelb\\source\\repos\\Mosaic\\Mosaic\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"

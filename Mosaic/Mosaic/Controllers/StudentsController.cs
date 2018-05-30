@@ -22,7 +22,6 @@ namespace Mosaic.Controllers
             _service = service;
         }
 
-
         //GET: Students/CannotEnroll
         public IActionResult CannotEnroll()
         {
@@ -32,6 +31,20 @@ namespace Mosaic.Controllers
         //GET: Students/EnrollInClass
         public IActionResult EnrollInClass()
         {
+            var student =  _context.Student.SingleOrDefault(m => m.Username == HttpContext.Session.GetString("username"));
+            var items1 = _context.Class.ToList();
+
+            for (int i = 0; i < items1.Count; i++)
+            {
+                if (items1[i].NumEnrolled + 1 > items1[i].MaxEnroll)
+                {
+                    items1.Remove(items1[i]);
+                }
+            }
+
+            ViewData["Classes"] = items1;
+            ViewData["ClassOne"] = student.ClassOne;
+            ViewData["ClassTwo"] = student.ClassTwo;
             return View();
         }
 
@@ -44,29 +57,41 @@ namespace Mosaic.Controllers
         //GET: Students/DropClass
         public IActionResult DropClass()
         {
+            var student = _context.Student.SingleOrDefault(m => m.Username == HttpContext.Session.GetString("username"));
+
+            ViewData["ClassOne"] = student.ClassOne;
+            ViewData["ClassTwo"] = student.ClassTwo;
+            ViewData["Classes"] = _context.Class.ToList();
             return View();
         }
 
         //GET: Students/ChangePassword
         public IActionResult ChangePassword()
         {
+            ViewData["Username"] = HttpContext.Session.GetString("username");
             return View();
         }
 
         //POST: Students/ChangePassword
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ChangePassword(string old, string newPass)
+        public async Task<IActionResult> ChangePassword(string oldPass, string newPass, string username)
         {
-            var student = _service.VerifyChangePassword(HttpContext.Session.GetString("username"), old, newPass);
+            var student = _service.VerifyChangePassword(username, oldPass, newPass);
+            ViewData["Username"] = HttpContext.Session.GetString("username");
 
             if (student != null)
             {
                 _context.Student.Update(student);
                 await _context.SaveChangesAsync();
+                ViewData["ErrorMessage"] = "Password change was successful.";
+                return View();
+            } else
+            {
+                ViewData["ErrorMessage"] = "Incorrect password, change password attempt failed.";
+                return View();
             }
 
-            return RedirectToAction("LoginStudent");
         }
 
         // POST: Students/DropClass
@@ -74,12 +99,18 @@ namespace Mosaic.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DropClass(string classCode)
+        public async Task<IActionResult> DropClass(string classCode, int result)
         {
-            if (_service.AllowDrop(classCode, HttpContext.Session.GetString("username")) == 1)
+            var student = await _context.Student.SingleOrDefaultAsync(m => m.Username == HttpContext.Session.GetString("username"));
+            var chosenClass = await _context.Class.SingleOrDefaultAsync(m => m.ClassCode == classCode.ToUpper());
+            ViewData["ClassOne"] = student.ClassOne;
+            ViewData["ClassTwo"] = student.ClassTwo;
+            ViewData["Classes"] = _context.Class.ToList();
+
+            int choice = Convert.ToInt32(result);
+
+            if (choice == 1)
             {
-                var chosenClass = await _context.Class.SingleOrDefaultAsync(m => m.ClassCode == classCode.ToUpper());
-                var student = await _context.Student.SingleOrDefaultAsync(m => m.Username == HttpContext.Session.GetString("username"));
                 student.ClassOne = null;
                 chosenClass.NumEnrolled--;
                 _context.Student.Update(student);
@@ -87,10 +118,8 @@ namespace Mosaic.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(DropClass));
             }
-            else if (_service.AllowDrop(classCode, HttpContext.Session.GetString("username")) == 2)
+            else if (choice == 2)
             {
-                var chosenClass = await _context.Class.SingleOrDefaultAsync(m => m.ClassCode == classCode.ToUpper());
-                var student = await _context.Student.SingleOrDefaultAsync(m => m.Username == HttpContext.Session.GetString("username"));
                 student.ClassTwo = null;
                 chosenClass.NumEnrolled--;
                 _context.Student.Update(student);
@@ -98,7 +127,6 @@ namespace Mosaic.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(DropClass));
             }
-                    
             return RedirectToAction(nameof(CannotDrop));
         }
 
@@ -107,12 +135,28 @@ namespace Mosaic.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EnrollInClass (string classCode)
+        public async Task<IActionResult> EnrollInClass(string classCode, string result)
         {
-            if (_service.AllowEnroll(classCode, HttpContext.Session.GetString("username")) == 1)
+            var student = await _context.Student.SingleOrDefaultAsync(m => m.Username == HttpContext.Session.GetString("username"));
+            var chosenClass = await _context.Class.SingleOrDefaultAsync(m => m.ClassCode == classCode.ToUpper());
+            var items1 = _context.Class.ToList();
+
+            for (int i = 0; i < items1.Count; i++)
             {
-                var chosenClass = await _context.Class.SingleOrDefaultAsync(m => m.ClassCode == classCode.ToUpper());
-                var student = await _context.Student.SingleOrDefaultAsync(m => m.Username == HttpContext.Session.GetString("username"));
+                if (items1[i].NumEnrolled + 1 > items1[i].MaxEnroll || items1[1].ClassCode.Equals(student.ClassOne) || items1[i].ClassCode.Equals(student.ClassTwo))
+                {
+                    items1.Remove(items1[i]);
+                }
+            }
+
+            ViewData["Classes"] = items1;
+            ViewData["ClassOne"] = student.ClassOne;
+            ViewData["ClassTwo"] = student.ClassTwo;
+
+            int choice = Convert.ToInt32(result);
+
+            if (choice == 1)
+            {
                 student.ClassOne = classCode.ToUpper();
                 chosenClass.NumEnrolled++;
                 _context.Student.Update(student);
@@ -120,10 +164,8 @@ namespace Mosaic.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(EnrollInClass));
 
-            } else if (_service.AllowEnroll(classCode, HttpContext.Session.GetString("username")) == 2)
+            } else if (choice == 2)
             {
-                var chosenClass = await _context.Class.SingleOrDefaultAsync(m => m.ClassCode == classCode.ToUpper());
-                var student = await _context.Student.SingleOrDefaultAsync(m => m.Username == HttpContext.Session.GetString("username"));
                 student.ClassTwo = classCode.ToUpper();
                 chosenClass.NumEnrolled++;
                 _context.Student.Update(student);
@@ -141,10 +183,15 @@ namespace Mosaic.Controllers
             if (HttpContext.Session.GetString("username") == null || HttpContext.Session.GetString("username").Equals(""))
             {
                 return View();
-            } else
+            } else if (HttpContext.Session.GetInt32("type") == 0)
             {
                 return RedirectToAction("Edit");
+            } else if (HttpContext.Session.GetInt32("type") == 1)
+            {
+                return RedirectToAction("Edit", "Professors");
             }
+
+            return View();
         }
 
         //GET: Students/UsernameTaken
@@ -162,6 +209,7 @@ namespace Mosaic.Controllers
         public IActionResult Logout ()
         {
             HttpContext.Session.SetString("username", "");
+            HttpContext.Session.SetInt32("type", -1);
             return RedirectToAction("Home");
         }
 
@@ -183,13 +231,23 @@ namespace Mosaic.Controllers
         {
             HttpContext.Session.SetString("username", "");
             var items1 = _context.Class.ToList();
-                var items2 = _context.Class.ToList();
-                items1.Insert(0, new Class { ClassCode = "" });
-                items2.Insert(0, new Class { ClassCode = "" });
+            var items2 = _context.Class.ToList();
+            for (int i = 0; i < items1.Count; i++)
+            {
+                if (items1[i].NumEnrolled + 1 > items1[i].MaxEnroll)
+                {
+                    items1.Remove(items1[i]);
+                    items2.Remove(items2[i]);
+                }
+            }
 
-                ViewData["ClassOne"] = new SelectList(items1, "ClassCode", "ClassCode", string.Empty);
-                ViewData["ClassTwo"] = new SelectList(items2, "ClassCode", "ClassCode", string.Empty);
-                return View();
+            items1.Insert(0, new Class { ClassCode = "" });
+            items2.Insert(0, new Class { ClassCode = "" });
+
+            ViewData["ClassOne"] = new SelectList(items1, "ClassCode", "ClassCode", string.Empty);
+            ViewData["ClassTwo"] = new SelectList(items2, "ClassCode", "ClassCode", string.Empty);
+            ViewData["Usernames"] = _context.Student.ToList();
+            return View();
         }
 
         // POST: Students/CreateStudent
@@ -202,44 +260,30 @@ namespace Mosaic.Controllers
             HttpContext.Session.SetString("username", "");
             var items1 = _context.Class.ToList();
             var items2 = _context.Class.ToList();
+            for (int i = 0; i < items1.Count; i++)
+            {
+                if (items1[i].NumEnrolled + 1 > items1[i].MaxEnroll)
+                {
+                    items1.Remove(items1[i]);
+                    items2.Remove(items2[i]);
+                }
+            }
             items1.Insert(0, new Class { ClassCode = "" });
             items2.Insert(0, new Class { ClassCode = "" });
 
             ViewData["ClassOne"] = new SelectList(items1, "ClassCode", "ClassCode", string.Empty);
             ViewData["ClassTwo"] = new SelectList(items2, "ClassCode", "ClassCode", string.Empty);
+            ViewData["Usernames"] = _context.Student.ToList();
 
-            string errorCode = _service.AllowCreate(student.Username, student.Password, student.ClassOne, student.ClassTwo);
-
-            switch (errorCode) {
-                case "":
-                    var classOne = await _context.Class.SingleOrDefaultAsync(m => m.ClassCode == student.ClassOne);
-                    var classTwo = await _context.Class.SingleOrDefaultAsync(m => m.ClassCode == student.ClassTwo);
-                    if (classOne != null) { classOne.NumEnrolled++; _context.Update(classOne); } else { student.ClassOne = null; }
-                    if (classTwo != null) { classTwo.NumEnrolled++; _context.Update(classTwo); } else { student.ClassTwo = null; }
-                    student.Password = _service.EncryptPassword(student.Password);
-                    _context.Add(student);
-                    await _context.SaveChangesAsync();
-                    ModelState.Clear();
-                    return RedirectToAction("StudentAdded");
-                case "usernametaken":
-                    TempData["ErrorMessage"] = "Username Taken";
-                    return RedirectToAction("CannotCreateStudent");
-                case "infotooshort":
-                    TempData["ErrorMessage"] = "Your username and password must be at least 5 characters";
-                    return RedirectToAction("CannotCreateStudent");
-                case "c1Invalid":
-                    TempData["ErrorMessage"] = student.ClassOne + " is either full or could not be found in database.";
-                    return RedirectToAction("CannotCreateStudent");
-                case "c2Invalid":
-                    TempData["ErrorMessage"] = student.ClassTwo + " is either full or could not be found in database.";
-                    return RedirectToAction("CannotCreateStudent");
-                case "c1Invalidc2Invalid":
-                    TempData["ErrorMessage"] = student.ClassOne + " and " + student.ClassTwo + " are full, or both could not be found in database.";
-                    return RedirectToAction("CannotCreateStudent");
-            }
-
-            //code should never reach here
-            return NotFound();
+            var classOne = await _context.Class.SingleOrDefaultAsync(m => m.ClassCode == student.ClassOne);
+            var classTwo = await _context.Class.SingleOrDefaultAsync(m => m.ClassCode == student.ClassTwo);
+            if (classOne != null) { classOne.NumEnrolled++; _context.Update(classOne); } else { student.ClassOne = null; }
+            if (classTwo != null) { classTwo.NumEnrolled++; _context.Update(classTwo); } else { student.ClassTwo = null; }
+            student.Password = _service.EncryptPassword(student.Password);
+            _context.Add(student);
+            await _context.SaveChangesAsync();
+            ModelState.Clear();
+            return RedirectToAction("LoginStudent");
         }
 
         public IActionResult CannotCreateStudent()
@@ -250,6 +294,8 @@ namespace Mosaic.Controllers
         // GET: Students/LoginStudent
         public IActionResult LoginStudent()
         {
+            ViewData["Users"] = _context.Student.ToList();
+
             return View();
         }
 
@@ -260,8 +306,10 @@ namespace Mosaic.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> LoginStudent(string username, string password)
         {
+            ViewData["Users"] = _context.Student.ToList();
             if (_service.AllowLogin(username, password))
             {
+                HttpContext.Session.SetInt32("type", 0);
                 HttpContext.Session.SetString("username", username);
                 return RedirectToAction(nameof(Menu));
             } else
@@ -308,7 +356,10 @@ namespace Mosaic.Controllers
                 try
                 {
                     ViewData["Student"] = student;
-                    _context.Update(student);
+                    if (student.Password != null)
+                    {
+                        _context.Update(student);
+                    }
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -321,6 +372,9 @@ namespace Mosaic.Controllers
                     {
                         throw;
                     }
+                } catch (SqlException se)
+                {
+                    return RedirectToAction(nameof(Edit));
                 }
                 return RedirectToAction(nameof(Edit));
             }
@@ -368,8 +422,9 @@ namespace Mosaic.Controllers
                 _context.Class.Update(classTwo);
             }
             _context.Student.Remove(student);
+            HttpContext.Session.SetString("username", "");
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Home));
+            return RedirectToAction("Home", "Students");
         }
 
         private bool StudentExists(string id)

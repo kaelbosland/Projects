@@ -1,4 +1,4 @@
-﻿@model Mosaic.Models.Student;
+﻿@model Mosaic.Models.Professor;
 
 @{
     ViewData["Title"] = "Menu";
@@ -17,7 +17,7 @@
     }
 </style>
 
-<h2>Student Menu</h2>
+<h2>Professor Menu</h2>
 
 <h3> Welcome to the Main Menu :)</h3>
 
@@ -25,34 +25,33 @@
 
 <div style="width:600px">
     <div style="width:300px; float:right;">
-        <img src="~/images/logincelebration.gif" alt="logged in successfully" />
+        <img src="~/images/happy.gif" alt="logged in successfully" />
     </div>
 
     <div style="width:300px; float:left;">
 
-        <form action="/Students/ChangePassword">
+        <form action="/Professors/ChangePassword">
             <button class="button" type="submit">Change Password</button>
         </form>
 
-        <form action="/Students/Index">
-            <button class="button" type="submit">View All Students</button>
+        <form action="/Professors/Index">
+            <button class="button" type="submit">View All Professors</button>
         </form>
 
-        <form action="/Students/Edit">
+        <form action="/Professors/Edit">
             <button class="button" type="submit">Check my Profile</button>
         </form>
 
-        <form action="/Students/EnrollInClass">
-            <button class="button" type="submit">Enroll in a Class</button>
+        <form action="/Professors/TeachAClass">
+            <button class="button" type="submit">Teach a Class</button>
         </form>
 
-        <form action="/Students/DropClass">
-            <button class="button" type="submit">Drop a Class</button>
+        <form action="/Professors/DropTeachingAClass">
+            <button class="button" type="submit">Drop Teaching a Class</button>
         </form>
 
-        <form action="/Students/Delete">
-            <button class="button" type="submit">Drop Out of School</button>
+        <form action="/Professors/Delete">
+            <button class="button" type="submit">End Career</button>
         </form>
-
     </div>
 </div>

@@ -16,7 +16,7 @@ namespace Mosaic.Models
         public string ClassName { get; set; }
         public int? NumEnrolled { get; set; }
         public int? MaxEnroll { get; set; }
-        public int? ProfessorId { get; set; }
+        public string ProfessorId { get; set; }
 
         public ICollection<Professor> Professor { get; set; }
         public ICollection<Student> StudentClassOneNavigation { get; set; }

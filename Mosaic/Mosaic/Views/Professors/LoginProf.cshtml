@@ -1,39 +1,40 @@
-﻿@model  Mosaic.Models.Student;
+﻿@model Mosaic.Models.Professor;
 
 @{
-    ViewData["Title"] = "LoginStudent";
+    ViewData["Title"] = "LoginProf";
 }
 
-@{ 
-    List<Student> users = (List<Student>)ViewData["Users"];
+
+@{
+    List<Professor> users = (List<Professor>)ViewData["Users"];
     List<string> usernames = new List<string>();
 
-    foreach (Student s in users)
+    foreach (Professor p in users)
     {
-        usernames.Add(s.Username);
+        usernames.Add(p.Username);
     }
 }
 
 <h2>Login</h2>
 
-<h4>Student</h4>
+<h4>Professor</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="LoginStudent">
+        <form asp-action="LoginProf">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="Username" class="control-label"></label>
-                <input asp-for="Username"  value="boslandk" class="form-control" required id="username" onblur="validate()"/>
+                <input asp-for="Username" value="prof" class="form-control" required id="username" onblur="validate()" />
                 <span asp-validation-for="Username" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Password" class="control-label"></label>
-                <input asp-for="Password"  value="password" class="form-control" type="password" required id="password"/>
+                <input asp-for="Password" value="password" class="form-control" type="password" required id="password" />
                 <span asp-validation-for="Password" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <input type="submit" value="Login" class="btn btn-default" onclick="return validate()"/>
+                <input type="submit" value="Login" class="btn btn-default" onclick="return validate()" />
             </div>
         </form>
     </div>
@@ -48,7 +49,7 @@
         var users = @Json.Serialize(usernames);
         var uName = document.getElementById("username").value;
         var numUsers = @usernames.Count;
-        
+
         var i;
         for (i = 0; i < numUsers; i++) {
             if (uName == users[i]) {
@@ -62,3 +63,5 @@
         return false;
     }
 </script>
+
+

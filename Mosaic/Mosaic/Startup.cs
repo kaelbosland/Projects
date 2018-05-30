@@ -30,13 +30,21 @@ namespace Mosaic
             services.AddSession(options =>
             {
                 options.Cookie.Name = "username";
-                options.IdleTimeout = TimeSpan.FromSeconds(90);
+                options.IdleTimeout = TimeSpan.FromSeconds(300);
                 options.Cookie.HttpOnly = true;
             });
 
-            var connection = @"Server=KAELS-LENOVO-YO\KB_SQLSERVER;Database=Mosaic;Trusted_Connection=True;ConnectRetryCount=0";
+            services.AddSession(options =>
+            {
+                options.Cookie.Name = "type";
+                options.IdleTimeout = TimeSpan.FromSeconds(300);
+                options.Cookie.HttpOnly = true;
+            });
+
+            var connection = @"Server=KAELS-LENOVO-YO\KB_SQLSERVER/;Database=Mosaic;Trusted_Connection=True;ConnectRetryCount=0";
             services.AddDbContext<LoginSystemContext>(options => options.UseSqlServer(connection));
             services.AddScoped<IStudentAuthentication, StudentAuthentication>();
+            services.AddScoped<IProfAuthentication, ProfAuthentication> ();
         }
 
 

@@ -12,6 +12,7 @@ namespace Mosaic.Models
 
         public LoginSystemContext(DbContextOptions<LoginSystemContext> options) : base(options)
         {
+          
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -36,7 +37,10 @@ namespace Mosaic.Models
 
                 entity.Property(e => e.NumEnrolled).HasColumnName("numEnrolled");
 
-                entity.Property(e => e.ProfessorId).HasColumnName("professorID");
+                entity.Property(e => e.ProfessorId)
+                .HasColumnName("professorID")
+                .HasMaxLength(20)
+                .IsUnicode(false);
             });
 
             modelBuilder.Entity<Professor>(entity =>
