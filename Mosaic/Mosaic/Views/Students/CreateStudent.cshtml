@@ -37,12 +37,12 @@
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="Username" class="control-label"></label>
-                <input asp-for="Username" class="form-control" required" id="username" onblur="validateUsername()"/>
+                <input asp-for="Username" class="form-control" required" id="username" onchange="validateUsername()"/>
                 <span asp-validation-for="Username" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Password" class="control-label"></label>
-                <input asp-for="Password" class="form-control" required id="password" onblur="validatePassword()"/>
+                <input asp-for="Password" class="form-control" required id="password" onchange="validatePassword()"/>
                 <span asp-validation-for="Password" class="text-danger"></span>
             </div>
             <div class="form-group">

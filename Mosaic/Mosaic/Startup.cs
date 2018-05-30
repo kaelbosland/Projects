@@ -41,7 +41,7 @@ namespace Mosaic
                 options.Cookie.HttpOnly = true;
             });
 
-            var connection = @"Server=KAELS-LENOVO-YO\KB_SQLSERVER/;Database=Mosaic;Trusted_Connection=True;ConnectRetryCount=0";
+            var connection = @"Data Source=KAELS-LENOVO-YO\KB_SQLSERVER;Initial Catalog=Mosaic;Integrated Security=True";
             services.AddDbContext<LoginSystemContext>(options => options.UseSqlServer(connection));
             services.AddScoped<IStudentAuthentication, StudentAuthentication>();
             services.AddScoped<IProfAuthentication, ProfAuthentication> ();
