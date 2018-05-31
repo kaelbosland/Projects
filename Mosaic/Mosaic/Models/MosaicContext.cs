@@ -61,9 +61,9 @@ namespace Mosaic.Models
                     .HasColumnName("message")
                     .IsUnicode(false);
 
-                entity.Property(e => e.Reciever)
+                entity.Property(e => e.Receiver)
                     .IsRequired()
-                    .HasColumnName("reciever")
+                    .HasColumnName("receiver")
                     .HasMaxLength(20)
                     .IsUnicode(false);
 

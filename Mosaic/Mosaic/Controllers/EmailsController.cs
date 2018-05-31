@@ -23,25 +23,41 @@ namespace Mosaic.Controllers
             _service = service;
         }
 
-        //GET: Emails/EmailLogin
-        public IActionResult EmailLogin ()
+        public IActionResult Menu ()
         {
             if (HttpContext.Session.GetInt32("type") == 0)
             {
-                RedirectToAction("EmailLogin", "Students");
+                return RedirectToAction("EmailMenu", "Students");
             } else if (HttpContext.Session.GetInt32("type") == 1)
             {
-                RedirectToAction("EmailLogin", "Professor");
+                return RedirectToAction("EmailMenu", "Professors");
             }
 
-            return View();
+            return RedirectToAction("Home", "Students");
         }
 
-        //POST: Emails/EmailLogin
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EmailLogin(string username, string password)
+        public IActionResult Reply (string subject, string sender)
         {
+            HttpContext.Session.SetString("subject", subject);
+            HttpContext.Session.SetString("receiver", sender);
+            return RedirectToAction("Create");
+        }
+
+        // GET: Emails/Inbox
+        public IActionResult Inbox()
+        {
+            string username = HttpContext.Session.GetString("username");
+            var emails = _context.Email.ToList();
+            List<Email> inbox = new List<Email>();
+            for (int i = 0; i < emails.Count; i++)
+            {
+                if (emails[i].Receiver.Equals(username))
+                {
+                    inbox.Add(emails[i]);
+                }
+            }
+            ViewData["Inbox"] = inbox;
+            ViewData["Username"] = username;
             return View();
         }
 
@@ -72,6 +88,10 @@ namespace Mosaic.Controllers
         // GET: Emails/Create
         public IActionResult Create()
         {
+            ViewData["receiver"] = HttpContext.Session.GetString("receiver");
+            ViewData["sender"] = HttpContext.Session.GetString("username");
+            ViewData["subject"] = HttpContext.Session.GetString("subject");
+            ViewData["message"] = HttpContext.Session.GetString("message");
             return View();
         }
 
@@ -80,13 +100,20 @@ namespace Mosaic.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Sender,Reciever,Subject,Message,Status")] Email email)
+        public async Task<IActionResult> Create(string sender, string receiver, string subject, string message)
         {
+            Email email = new Email { Sender = sender, Receiver = receiver, Subject = subject, Message = message };
+
             if (ModelState.IsValid)
             {
+                email.Status = "Delivered @ " + DateTime.Now.ToString("HH:mm") + " on " + DateTime.Today.ToString("dd-MM-yyyy");
                 _context.Add(email);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                HttpContext.Session.SetString("receiver", "");
+                HttpContext.Session.SetString("subject", "");
+                HttpContext.Session.SetString("message", "");
+                ModelState.Clear();
+                return View();
             }
             return View(email);
         }
@@ -112,7 +139,7 @@ namespace Mosaic.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Sender,Reciever,Subject,Message,Status")] Email email)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Sender,Receiever,Subject,Message,Status")] Email email)
         {
             if (id != email.Id)
             {

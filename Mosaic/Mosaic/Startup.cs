@@ -41,6 +41,27 @@ namespace Mosaic
                 options.Cookie.HttpOnly = true;
             });
 
+            services.AddSession(options =>
+            {
+                options.Cookie.Name = "receiver";
+                options.IdleTimeout = TimeSpan.FromSeconds(300);
+                options.Cookie.HttpOnly = true;
+            });
+
+            services.AddSession(options =>
+            {
+                options.Cookie.Name = "subject";
+                options.IdleTimeout = TimeSpan.FromSeconds(300);
+                options.Cookie.HttpOnly = true;
+            });
+
+            services.AddSession(options =>
+            {
+                options.Cookie.Name = "message";
+                options.IdleTimeout = TimeSpan.FromSeconds(300);
+                options.Cookie.HttpOnly = true;
+            });
+
             var connection = @"Data Source=KAELS-LENOVO-YO\KB_SQLSERVER;Initial Catalog=Mosaic;Integrated Security=True";
             services.AddDbContext<MosaicContext>(options => options.UseSqlServer(connection));
             services.AddScoped<IStudentAuthentication, StudentAuthentication>();

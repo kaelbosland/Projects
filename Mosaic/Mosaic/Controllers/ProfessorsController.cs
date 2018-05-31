@@ -24,25 +24,6 @@ namespace Mosaic.Controllers
             _emailService = emailService;
         }
 
-        //GET: Professors/EmailLogin
-        public IActionResult EmailLogin()
-        {
-            return View();
-        }
-
-        //POST: Professors/EmailLogin
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EmailLogin(string password)
-        {
-            if (_emailService.AllowLogin(HttpContext.Session.GetString("username"), password, (int) HttpContext.Session.GetInt32("type")))
-            {
-                return RedirectToAction("EmailMenu");
-            }
-
-            return RedirectToAction("EmailLogin");
-        }
-
         //GET: Professors/EmailMenu
         public IActionResult EmailMenu()
         {
