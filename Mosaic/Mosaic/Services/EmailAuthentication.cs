@@ -15,31 +15,38 @@ namespace Mosaic.Services
     {
         private readonly MosaicContext _context;
 
-        public EmailAuthentication (MosaicContext context)
+        public EmailAuthentication(MosaicContext context)
         {
             _context = context;
         }
 
         public bool AllowLogin(string username, string password, int type)
         {
- 
+
             if (type == 0)
             {
                 var student = _context.Student.SingleOrDefault(m => m.Username == username);
                 if (student != null)
                 {
-
+                    if (EncryptPassword(password).Equals(student.Password))
+                    {
+                        return true;
+                    }
                 }
-            } else if (type == 1)
+            }
+            else if (type == 1)
             {
                 var professor = _context.Professor.SingleOrDefault(m => m.Username == username);
                 if (professor != null)
                 {
-
+                    if (EncryptPassword(password).Equals(professor.Password))
+                    {
+                        return true;
+                    }
                 }
             }
 
-            return true;
+            return false;
         }
 
         public string EncryptPassword(string password)

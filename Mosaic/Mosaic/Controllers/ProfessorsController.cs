@@ -27,6 +27,8 @@ namespace Mosaic.Controllers
         //GET: Professors/EmailMenu
         public IActionResult EmailMenu()
         {
+            var prof = _context.Professor.SingleOrDefault(m => m.Username == HttpContext.Session.GetString("username"));
+            ViewData["ClassOne"] = prof.ClassOne;
             return View();
         }
 
@@ -34,6 +36,7 @@ namespace Mosaic.Controllers
         public IActionResult ChangePassword()
         {
             ViewData["Username"] = HttpContext.Session.GetString("username");
+            ViewData["Usernames"] = _service.ReturnAllUsernames();
             return View();
         }
 
@@ -44,6 +47,7 @@ namespace Mosaic.Controllers
         {
             var professor = _service.VerifyChangePassword(username, oldPass, newPass);
             ViewData["Username"] = HttpContext.Session.GetString("username");
+            ViewData["Usernames"] = _service.ReturnAllUsernames();
 
             if (professor != null)
             {
@@ -114,7 +118,7 @@ namespace Mosaic.Controllers
         //GET: Professors/DropTeachingAClass
         public IActionResult DropTeachingAClass()
         {
-            var professor = _context.Professor.SingleOrDefault(m => m.Username ==  HttpContext.Session.GetString("username"));
+            var professor = _context.Professor.SingleOrDefault(m => m.Username == HttpContext.Session.GetString("username"));
             var classList = _context.Class.ToList();
 
             ViewData["ClassOne"] = professor.ClassOne;
@@ -160,6 +164,7 @@ namespace Mosaic.Controllers
         // GET: Professors/LoginProf
         public IActionResult LoginProf()
         {
+            HttpContext.Session.SetString("username", "");
             ViewData["Users"] = _context.Professor.ToList();
             return View();
         }
@@ -172,7 +177,7 @@ namespace Mosaic.Controllers
         public async Task<IActionResult> LoginProf(string username, string password)
         {
             ViewData["Users"] = _context.Professor.ToList();
-            if (_service.AllowLogin(username, password))
+            if (_service.AllowLogin(username, password) != null)
             {
                 HttpContext.Session.SetString("username", username);
                 HttpContext.Session.SetInt32("type", 1);
@@ -180,7 +185,8 @@ namespace Mosaic.Controllers
             }
             else
             {
-                return NotFound();
+                ViewData["ErrorMsg"] = "Login failed, incorrect password!";
+                return View();
             }
         }
 
@@ -207,7 +213,7 @@ namespace Mosaic.Controllers
             items1.Insert(0, new Class { ClassCode = "" });
 
             ViewData["ClassOne"] = new SelectList(items1, "ClassCode", "ClassCode", string.Empty);
-            ViewData["Usernames"] = _context.Student.ToList();
+            ViewData["Usernames"] = _service.ReturnAllUsernames();
             return View();
         }
 
@@ -230,7 +236,7 @@ namespace Mosaic.Controllers
             items1.Insert(0, new Class { ClassCode = "" });
 
             ViewData["ClassOne"] = new SelectList(items1, "ClassCode", "ClassCode", string.Empty);
-            ViewData["Usernames"] = _context.Student.ToList();
+            ViewData["Usernames"] = _service.ReturnAllUsernames();
 
             var classOne = await _context.Class.SingleOrDefaultAsync(m => m.ClassCode == professor.ClassOne);
             if (classOne != null) { classOne.ProfessorId = professor.Username; _context.Update(classOne); } else { professor.ClassOne = null; }
@@ -252,15 +258,15 @@ namespace Mosaic.Controllers
             }
 
             var professor = await _context.Professor.SingleOrDefaultAsync(m => m.Username == id);
-            ViewData["Professor"] = professor; 
+            ViewData["Professor"] = professor;
             if (professor == null)
             {
                 return NotFound();
             }
-            
+
             return View(professor);
         }
-    
+
         // POST: Professors/Edit
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
@@ -290,7 +296,7 @@ namespace Mosaic.Controllers
                         throw;
                     }
                 }
-                
+
             }
             return View(professor);
         }
@@ -337,3 +343,4 @@ namespace Mosaic.Controllers
         }
     }
 }
+

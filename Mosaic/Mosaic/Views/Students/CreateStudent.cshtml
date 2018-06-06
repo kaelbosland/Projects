@@ -6,13 +6,7 @@
 }
 
 @{ 
-    List<Student> Users = (List<Student>)ViewData["Usernames"];
-    List<string> usernames = new List<string>();
-
-    foreach (Student s in Users)
-    {
-        usernames.Add(s.Username);
-    }
+    List<string> usernames = (List<string>)ViewData["Usernames"];
 }
 
 <style>
@@ -52,7 +46,7 @@
             </div>
             <div class="form-group">
                 <label asp-for="LastName" class="control-label"> </label>
-                <input asp-for="LastName" class="form-control" required if="lastName"/>
+                <input asp-for="LastName" class="form-control" required id="lastName"/>
                 <span asp-validation-for="LastName" class="text-danger"> </span>
             </div>
             <div class="form-group">
@@ -110,6 +104,7 @@
             document.getElementById("password").style.backgroundColor = "LightGreen";
             return true;
         }
+
         document.getElementById("password").style.backgroundColor = "LightCoral";
         alert("The password must be at least 5 characters and at most 20 characters!");
         return false;
@@ -119,7 +114,7 @@
         var classOne = document.getElementById("classOne").value;
         var classTwo = document.getElementById("classTwo").value;
 
-        if (classOne == null && classTwo == null) {
+        if ((classOne == null || classOne == "") && (classTwo == null || classTwo == "")) {
             document.getElementById("classOne").style.backgroundColor = "LightGreen";
             document.getElementById("classTwo").style.backgroundColor = "LightGreen";
             return true;
@@ -137,8 +132,8 @@
     }
 
     function validateAll() {
-        var ok = validateUsername() && validatePassword() && validateClasses;
-        if (ok) {
+        var ok = validateUsername() && validatePassword() && validateClasses();
+        if (ok && document.getElementById("firstName").value.length > 1 && document.getElementById("lastName").value.length > 1)  {
             alert("The student has been registered successfully! Login with your new credentials to activate your account.");
         }
         return ok;

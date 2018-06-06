@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Mosaic.Models;
 
 namespace Mosaic.Models
 {
@@ -10,6 +11,8 @@ namespace Mosaic.Models
         public virtual DbSet<Email> Email { get; set; }
         public virtual DbSet<Professor> Professor { get; set; }
         public virtual DbSet<Student> Student { get; set; }
+        public virtual DbSet<Announcement> Announcement { get; set; }
+
 
         public MosaicContext(DbContextOptions<MosaicContext> options) : base(options)
         {
@@ -26,6 +29,28 @@ namespace Mosaic.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+
+            modelBuilder.Entity<Announcement>(entity =>
+            {
+                entity.Property(e => e.ID).HasColumnName("ID");
+
+                entity.Property(e => e.AnnouncementText)
+                    .HasColumnName("announcementText")
+                    .IsRequired()
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ClassCode)
+                    .HasColumnName("classCode")
+                    .IsUnicode(false)
+                    .IsRequired();
+
+                entity.Property(e => e.ProfUsername)
+                    .HasColumnName("profUsername")
+                    .IsRequired()
+                    .IsUnicode(false);
+
+            });
+
             modelBuilder.Entity<Class>(entity =>
             {
                 entity.HasKey(e => e.ClassCode);

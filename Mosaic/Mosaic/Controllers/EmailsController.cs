@@ -23,12 +23,26 @@ namespace Mosaic.Controllers
             _service = service;
         }
 
-        public IActionResult Menu ()
+        public IActionResult Read(int id)
+        {
+            Email email = _context.Email.SingleOrDefault(m => m.Id == id );
+            if (email.Status[0] != 'R')
+            {
+                email.Status = "Read @ " + DateTime.Now.ToString("HH:mm") + " on " + DateTime.Today.ToString("dd-MM-yyyy");
+                _context.Email.Update(email);
+                _context.SaveChanges();
+            }
+
+            return RedirectToAction("Inbox");
+        }
+
+        public IActionResult Menu()
         {
             if (HttpContext.Session.GetInt32("type") == 0)
             {
                 return RedirectToAction("EmailMenu", "Students");
-            } else if (HttpContext.Session.GetInt32("type") == 1)
+            }
+            else if (HttpContext.Session.GetInt32("type") == 1)
             {
                 return RedirectToAction("EmailMenu", "Professors");
             }
@@ -36,10 +50,20 @@ namespace Mosaic.Controllers
             return RedirectToAction("Home", "Students");
         }
 
-        public IActionResult Reply (string subject, string sender)
+        public IActionResult Reply(string subject, string sender)
         {
-            HttpContext.Session.SetString("subject", subject);
+            HttpContext.Session.SetString("subject", "RE: " + subject);
             HttpContext.Session.SetString("receiver", sender);
+
+            return RedirectToAction("Create");
+        }
+
+        public IActionResult Forward(string subject, string sender, string message)
+        {
+            HttpContext.Session.SetString("subject", "FWD From " + sender + ": " + subject);
+            HttpContext.Session.SetString("message", message);
+            TempData["type"] = "fwd";
+
             return RedirectToAction("Create");
         }
 
@@ -56,42 +80,93 @@ namespace Mosaic.Controllers
                     inbox.Add(emails[i]);
                 }
             }
+            inbox.Reverse();
             ViewData["Inbox"] = inbox;
             ViewData["Username"] = username;
             return View();
         }
 
-        // GET: Emails
-        public async Task<IActionResult> Index()
+        // GET: Emails/SentMail
+        public IActionResult SentMail()
         {
-            return View(await _context.Email.ToListAsync());
+            string username = HttpContext.Session.GetString("username");
+            var emails = _context.Email.ToList();
+            List<Email> inbox = new List<Email>();
+            for (int i = 0; i < emails.Count; i++)
+            {
+                if (emails[i].Sender.Equals(username))
+                {
+                    inbox.Add(emails[i]);
+                }
+            }
+            ViewData["Inbox"] = inbox;
+            ViewData["Username"] = username;
+            return View();
         }
 
-        // GET: Emails/Details/5
-        public async Task<IActionResult> Details(int? id)
+        //GET: Emails/ContactsList
+        public IActionResult ContactsList()
         {
-            if (id == null)
+            string username = HttpContext.Session.GetString("username");
+            var allUsers = _context.Student
+                               .Where(x => x.Username != username)
+                               .Select(x => new { x.Username, x.FirstName, x.LastName })
+                               .Union(
+
+                                   _context.Professor
+                                   .Where(x => x.Username != username)
+                                   .Select(x => new { x.Username, x.FirstName, x.LastName })
+                               ).ToList();
+
+            int count = _context.Student.Count() + _context.Professor.Count() - 1;
+
+            List<Tuple<string, string, string>> users = new List<Tuple<string, string, string>>();
+
+            for (int i = 0; i < count; i++)
             {
-                return NotFound();
+                users.Add(Tuple.Create<string, string, string>(allUsers[i].Username, allUsers[i].FirstName, allUsers[i].LastName));
             }
 
-            var email = await _context.Email
-                .SingleOrDefaultAsync(m => m.Id == id);
-            if (email == null)
-            {
-                return NotFound();
-            }
+            ViewData["contacts"] = users;
 
-            return View(email);
+            return View();
+        }
+
+        public IActionResult SendContactEmail(string receiver)
+        {
+            HttpContext.Session.SetString("receiver", receiver);
+            return RedirectToAction("Create");
         }
 
         // GET: Emails/Create
         public IActionResult Create()
         {
+
+
             ViewData["receiver"] = HttpContext.Session.GetString("receiver");
             ViewData["sender"] = HttpContext.Session.GetString("username");
             ViewData["subject"] = HttpContext.Session.GetString("subject");
             ViewData["message"] = HttpContext.Session.GetString("message");
+
+        
+            List<Student> students = _context.Student.ToList();
+            List<Professor> profs = _context.Professor.ToList();
+            List<string> usernames = new List<string>();
+            for (int i = 0; i < students.Count; i++)
+            {
+                usernames.Add(students[i].Username);
+            }
+
+            for (int i = 0; i < profs.Count; i++)
+            {
+                usernames.Add(profs[i].Username);
+            }
+
+            ViewData["usernames"] = usernames;
+
+            HttpContext.Session.SetString("receiver", "");
+            HttpContext.Session.SetString("subject", "");
+            HttpContext.Session.SetString("message", "");
             return View();
         }
 
@@ -102,105 +177,32 @@ namespace Mosaic.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(string sender, string receiver, string subject, string message)
         {
+            ViewData["sender"] = HttpContext.Session.GetString("username");
+            List<Student> students = _context.Student.ToList();
+            List<Professor> profs = _context.Professor.ToList();
+            List<string> usernames = new List<string>();
+            for (int i = 0; i < students.Count; i++)
+            {
+                usernames.Add(students[i].Username);
+            }
+
+            for (int i = 0; i < profs.Count; i++)
+            {
+                usernames.Add(profs[i].Username);
+            }
+
+            ViewData["usernames"] = usernames;
             Email email = new Email { Sender = sender, Receiver = receiver, Subject = subject, Message = message };
 
-            if (ModelState.IsValid)
-            {
-                email.Status = "Delivered @ " + DateTime.Now.ToString("HH:mm") + " on " + DateTime.Today.ToString("dd-MM-yyyy");
-                _context.Add(email);
-                await _context.SaveChangesAsync();
-                HttpContext.Session.SetString("receiver", "");
-                HttpContext.Session.SetString("subject", "");
-                HttpContext.Session.SetString("message", "");
-                ModelState.Clear();
-                return View();
-            }
-            return View(email);
-        }
-
-        // GET: Emails/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var email = await _context.Email.SingleOrDefaultAsync(m => m.Id == id);
-            if (email == null)
-            {
-                return NotFound();
-            }
-            return View(email);
-        }
-
-        // POST: Emails/Edit/5
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Sender,Receiever,Subject,Message,Status")] Email email)
-        {
-            if (id != email.Id)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(email);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!EmailExists(email.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            return View(email);
-        }
-
-        // GET: Emails/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var email = await _context.Email
-                .SingleOrDefaultAsync(m => m.Id == id);
-            if (email == null)
-            {
-                return NotFound();
-            }
-
-            return View(email);
-        }
-
-        // POST: Emails/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var email = await _context.Email.SingleOrDefaultAsync(m => m.Id == id);
-            _context.Email.Remove(email);
+            email.Status = "Delivered @ " + DateTime.Now.ToString("HH:mm") + " on " + DateTime.Today.ToString("dd-MM-yyyy");
+            _context.Add(email);
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
 
-        private bool EmailExists(int id)
-        {
-            return _context.Email.Any(e => e.Id == id);
+            HttpContext.Session.SetString("receiver", "");
+            HttpContext.Session.SetString("subject", "");
+            HttpContext.Session.SetString("message", "");
+            return RedirectToAction("Menu");
         }
     }
 }
+

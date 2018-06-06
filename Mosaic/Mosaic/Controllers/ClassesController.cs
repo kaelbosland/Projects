@@ -11,9 +11,9 @@ namespace Mosaic.Controllers
 {
     public class ClassesController : Controller
     {
-        private readonly Models.MosaicContext _context;
+        private readonly MosaicContext _context;
 
-        public ClassesController(Models.MosaicContext context)
+        public ClassesController(MosaicContext context)
         {
             _context = context;
         }

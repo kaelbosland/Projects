@@ -10,25 +10,42 @@ namespace Mosaic.Services
 {
     public class ProfAuthentication : IProfAuthentication
     {
-        private readonly Models.MosaicContext _context;
+        private readonly MosaicContext _context;
 
-        public ProfAuthentication (Models.MosaicContext context)
+        public ProfAuthentication (MosaicContext context)
         {
             _context = context;
         }
 
-        public bool AllowLogin(string username, string password)
+        public List<string> ReturnAllUsernames()
+        {
+            List<string> usernames = new List<string>();
+            List<Student> students = _context.Student.ToList();
+            foreach (Student s in students)
+            {
+                usernames.Add(s.Username);
+            }
+            List<Professor> profs = _context.Professor.ToList();
+            foreach (Professor p in profs)
+            {
+                usernames.Add(p.Username);
+            }
+            
+            return usernames;
+        }
+
+        public Professor AllowLogin(string username, string password)
         {
             var prof = _context.Professor.SingleOrDefault(m => m.Username == username);
             if (prof != null)
             {
                 if (prof.Password.Equals(EncryptPassword(password)))
                 {
-                    return true;
+                    return prof;
                 }
             }
 
-            return true;
+            return null;
         }
 
         public string EncryptPassword(string password)
