@@ -16,7 +16,24 @@ namespace Mosaic.Services
         {
             this._context = context;
         }
-    
+
+        public List<string> ReturnAllUsernames()
+        {
+            List<string> usernames = new List<string>();
+            List<Student> students = _context.Student.ToList();
+            foreach (Student s in students)
+            {
+                usernames.Add(s.Username);
+            }
+            List<Professor> profs = _context.Professor.ToList();
+            foreach (Professor p in profs)
+            {
+                usernames.Add(p.Username);
+            }
+
+            return usernames;
+        }
+
         public bool AllowLogin (string username, string password)
         {
 

@@ -1,4 +1,5 @@
 ﻿using Mosaic.Models;
+using System.Collections.Generic;
 
 namespace Mosaic.Services
 {
@@ -7,5 +8,7 @@ namespace Mosaic.Services
         bool AllowLogin(string username, string password);
         string EncryptPassword(string password);
         Professor VerifyChangePassword(string username, string oldPass, string newPass);
+        List<string> ReturnAllUsernames();
+
     }
 }
