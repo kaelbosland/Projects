@@ -13,14 +13,11 @@
     {
         usernames.Add(p.Username);
     }
-
-    string erroMessage = (string)ViewData["ErrorMsg"];
 }
 
 <h2>Login</h2>
 
 <h4>Professor</h4>
-<h5>@erroMessage</h5>
 <hr />
 <div class="row">
     <div class="col-md-4">
@@ -28,12 +25,12 @@
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="Username" class="control-label"></label>
-                <input asp-for="Username" class="form-control" required id="username" onchange="validate()" />
+                <input asp-for="Username" value="professor" class="form-control" required id="username" onchange="validate()" />
                 <span asp-validation-for="Username" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Password" class="control-label"></label>
-                <input asp-for="Password" class="form-control" type="password" required id="password" />
+                <input asp-for="Password" value="password" class="form-control" type="password" required id="password" />
                 <span asp-validation-for="Password" class="text-danger"></span>
             </div>
             <div class="form-group">
@@ -42,6 +39,7 @@
         </form>
     </div>
 </div>
+
 <div>
     <a asp-action="ChangePassword"><hr /> Forgot Password </a>
 </div>

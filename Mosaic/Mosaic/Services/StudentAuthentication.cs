@@ -11,29 +11,13 @@ namespace Mosaic.Services
     public class StudentAuthentication : IStudentAuthentication
     {
 
-        private readonly MosaicContext _context;
-        public StudentAuthentication (MosaicContext context)
+        private readonly Models.MosaicContext _context;
+        public StudentAuthentication (Models.MosaicContext context)
         {
             this._context = context;
         }
-        public List<string> ReturnAllUsernames()
-        {
-            List<string> usernames = new List<string>();
-            List<Student> students = _context.Student.ToList();
-            foreach (Student s in students)
-            {
-                usernames.Add(s.Username);
-            }
-            List<Professor> profs = _context.Professor.ToList();
-            foreach (Professor p in profs)
-            {
-                usernames.Add(p.Username);
-            }
-
-            return usernames;
-        }
-
-        public Student AllowLogin (string username, string password)
+    
+        public bool AllowLogin (string username, string password)
         {
 
             var student = _context.Student.SingleOrDefault(m => m.Username == username);
@@ -41,10 +25,10 @@ namespace Mosaic.Services
             {
                 if (EncryptPassword(password).Equals(student.Password)) //checking if the password corresponds to the same entry as the username in database
                 {
-                    return student;
+                    return true;
                 }
             }
-            return null;
+            return false;
         }
 
         public string EncryptPassword (string password)

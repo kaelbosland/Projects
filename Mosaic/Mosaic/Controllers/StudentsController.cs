@@ -8,7 +8,6 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
 using Mosaic.Services;
-using System.Collections.Generic;
 
 namespace Mosaic.Controllers
 {
@@ -23,10 +22,10 @@ namespace Mosaic.Controllers
             _context = context;
             _service = service;
             _emailService = emailService;
-        }
+        }        
 
         //GET: Students/EmailMenu
-        public IActionResult EmailMenu()
+        public IActionResult EmailMenu ()
         {
             return View();
         }
@@ -40,7 +39,7 @@ namespace Mosaic.Controllers
         //GET: Students/EnrollInClass
         public IActionResult EnrollInClass()
         {
-            var student = _context.Student.SingleOrDefault(m => m.Username == HttpContext.Session.GetString("username"));
+            var student =  _context.Student.SingleOrDefault(m => m.Username == HttpContext.Session.GetString("username"));
             var items1 = _context.Class.ToList();
 
             for (int i = 0; i < items1.Count; i++)
@@ -78,7 +77,6 @@ namespace Mosaic.Controllers
         public IActionResult ChangePassword()
         {
             ViewData["Username"] = HttpContext.Session.GetString("username");
-            ViewData["Usernames"] = _service.ReturnAllUsernames();
             return View();
         }
 
@@ -89,7 +87,6 @@ namespace Mosaic.Controllers
         {
             var student = _service.VerifyChangePassword(username, oldPass, newPass);
             ViewData["Username"] = HttpContext.Session.GetString("username");
-            ViewData["Usernames"] = _service.ReturnAllUsernames();
 
             if (student != null)
             {
@@ -97,12 +94,12 @@ namespace Mosaic.Controllers
                 await _context.SaveChangesAsync();
                 ViewData["ErrorMessage"] = "Password change was successful.";
                 return View();
-            }
-            else
+            } else
             {
                 ViewData["ErrorMessage"] = "Incorrect password, change password attempt failed.";
                 return View();
             }
+
         }
 
         // POST: Students/DropClass
@@ -174,8 +171,8 @@ namespace Mosaic.Controllers
                 _context.Class.Update(chosenClass);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(EnrollInClass));
-            }
-            else if (choice == 2)
+
+            } else if (choice == 2)
             {
                 student.ClassTwo = classCode.ToUpper();
                 chosenClass.NumEnrolled++;
@@ -194,12 +191,10 @@ namespace Mosaic.Controllers
             if (HttpContext.Session.GetString("username") == null || HttpContext.Session.GetString("username").Equals(""))
             {
                 return View();
-            }
-            else if (HttpContext.Session.GetInt32("type") == 0)
+            } else if (HttpContext.Session.GetInt32("type") == 0)
             {
                 return RedirectToAction("Edit");
-            }
-            else if (HttpContext.Session.GetInt32("type") == 1)
+            } else if (HttpContext.Session.GetInt32("type") == 1)
             {
                 return RedirectToAction("Edit", "Professors");
             }
@@ -214,12 +209,12 @@ namespace Mosaic.Controllers
         }
 
         //GET: Students/Menu
-        public IActionResult Menu()
+        public IActionResult Menu ()
         {
             return View();
         }
 
-        public IActionResult Logout()
+        public IActionResult Logout ()
         {
             HttpContext.Session.SetString("username", "");
             HttpContext.Session.SetInt32("type", -1);
@@ -231,7 +226,7 @@ namespace Mosaic.Controllers
         {
             return View();
         }
-
+        
         // GET: Students
         public async Task<IActionResult> Index()
         {
@@ -239,7 +234,7 @@ namespace Mosaic.Controllers
             return View(await loginSystemContext.ToListAsync());
         }
 
-        // GET: Students/CreateStudent
+              // GET: Students/CreateStudent
         public IActionResult CreateStudent()
         {
             HttpContext.Session.SetString("username", "");
@@ -259,7 +254,7 @@ namespace Mosaic.Controllers
 
             ViewData["ClassOne"] = new SelectList(items1, "ClassCode", "ClassCode", string.Empty);
             ViewData["ClassTwo"] = new SelectList(items2, "ClassCode", "ClassCode", string.Empty);
-            ViewData["Usernames"] = _service.ReturnAllUsernames();
+            ViewData["Usernames"] = _context.Student.ToList();
             return View();
         }
 
@@ -286,7 +281,7 @@ namespace Mosaic.Controllers
 
             ViewData["ClassOne"] = new SelectList(items1, "ClassCode", "ClassCode", string.Empty);
             ViewData["ClassTwo"] = new SelectList(items2, "ClassCode", "ClassCode", string.Empty);
-            ViewData["Usernames"] = _service.ReturnAllUsernames();
+            ViewData["Usernames"] = _context.Student.ToList();
 
             var classOne = await _context.Class.SingleOrDefaultAsync(m => m.ClassCode == student.ClassOne);
             var classTwo = await _context.Class.SingleOrDefaultAsync(m => m.ClassCode == student.ClassTwo);
@@ -308,7 +303,7 @@ namespace Mosaic.Controllers
         public IActionResult LoginStudent()
         {
             ViewData["Users"] = _context.Student.ToList();
-            HttpContext.Session.SetString("username", "");
+
             return View();
         }
 
@@ -320,35 +315,38 @@ namespace Mosaic.Controllers
         public async Task<IActionResult> LoginStudent(string username, string password)
         {
             ViewData["Users"] = _context.Student.ToList();
-            if (_service.AllowLogin(username, password) != null)
+            if (_service.AllowLogin(username, password))
             {
                 HttpContext.Session.SetInt32("type", 0);
                 HttpContext.Session.SetString("username", username);
                 return RedirectToAction(nameof(Menu));
-            }
-            else
+            } else
             {
-                ViewData["ErrorMsg"] = "Login failed, incorrect password!";
-                return View();
+                return RedirectToAction(nameof(StudentNotFound));
             }
+        }
+
+        public IActionResult StudentAdded()
+        {
+            return View();
         }
 
         // GET: Students/Edit
         public async Task<IActionResult> Edit()
         {
-            String id = HttpContext.Session.GetString("username");
-
-            if (id == null)
-            {
+                String id = HttpContext.Session.GetString("username");
+            
+                if (id == null)
+                {
                 return NotFound();
-            }
+                }
 
-            var student = await _context.Student.SingleOrDefaultAsync(m => m.Username == id);
-            ViewData["Student"] = student;
-            if (student == null)
-            {
-                return RedirectToAction(nameof(StudentNotFound));
-            }
+                var student = await _context.Student.SingleOrDefaultAsync(m => m.Username == id);
+                ViewData["Student"] = student;
+                if (student == null)
+                {
+                    return RedirectToAction(nameof(StudentNotFound));
+                }
 
             return View(student);
         }
@@ -382,8 +380,7 @@ namespace Mosaic.Controllers
                     {
                         throw;
                     }
-                }
-                catch (SqlException se)
+                } catch (SqlException se)
                 {
                     return RedirectToAction(nameof(Edit));
                 }
@@ -405,7 +402,7 @@ namespace Mosaic.Controllers
                 .SingleOrDefaultAsync(m => m.Username == id);
             if (student == null)
             {
-                return NotFound();
+                return RedirectToAction(nameof(StudentNotFound));
             }
 
             return View(student);
@@ -417,7 +414,7 @@ namespace Mosaic.Controllers
         public async Task<IActionResult> DeleteConfirmed()
         {
 
-            string id = HttpContext.Session.GetString("username");
+            String id = HttpContext.Session.GetString("username");
             var student = await _context.Student.SingleOrDefaultAsync(m => m.Username == id);
             if (student.ClassOne != null)
             {
@@ -432,16 +429,6 @@ namespace Mosaic.Controllers
                 classTwo.NumEnrolled--;
                 _context.Class.Update(classTwo);
             }
-
-            List<Announcement> announcements = _context.Announcement.ToList();
-            for (int i = 0; i < announcements.Count; i++)
-            {
-                if (announcements[i].ProfUsername.Equals(id))
-                {
-                    _context.Announcement.Remove(announcements[i]);
-                }
-            }
-
             _context.Student.Remove(student);
             HttpContext.Session.SetString("username", "");
             await _context.SaveChangesAsync();

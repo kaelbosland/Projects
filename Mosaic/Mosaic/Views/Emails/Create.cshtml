@@ -4,92 +4,47 @@
     ViewData["Title"] = "Create";
 }
 
-@{
+@{ 
     string receiver = (string)ViewData["receiver"];
     string sender = (string)ViewData["sender"];
     string subject = (string)ViewData["subject"];
-    string message = (string)ViewData["message"];
-
-    List<string> users = (List<string>)ViewData["usernames"];
 }
 
-    <h2>Create</h2>
+<h2>Create</h2>
 
-    <h4>Email</h4>
-    <hr />
-    <div class="row">
-        <div class="col-md-4">
-            <form asp-action="Create" id="form" >
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                <div class="form-group">
-                    <label class="control-label">Sender</label>
-                    <input type="text" class="form-control" value="@sender" id="sender" name="sender" readonly="readonly"/>
-                </div>
-                <div class="form-group">
-                    <label class="control-label">Receiver</label>
-                    <input class="form-control" value="@receiver" id="receiver" name="receiver" onchange="validate()" required />
-                </div>
-                <div class="form-group">
-                    <label class="control-label">Subject</label>
-                    <input class="form-control" value="@subject" id="subject" name="subject" />
-                </div>
-                <div class="form-group">
-                    <label class="control-label">Message</label>
-                    <textarea class="form-control" id="message" name="message" style="height:200px" required onchange="validateMsg()">@message</textarea>
-                </div>
-                <div class="form-group">
-                    <input type="button" value="Send Email" class="btn btn-default" onclick="return validateForm()"/>
-                </div>
-            </form>
-        </div>
+<h4>Email</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Sender" class="control-label"></label>
+                <input type="text" asp-for="Sender" class="form-control" value="@sender" id="sender" name="sender" readonly="readonly"/>
+            </div>
+            <div class="form-group">
+                <label asp-for="Receiver" class="control-label"></label>
+                <input asp-for="Receiver" class="form-control" value="@receiver" id="receiver" name="receiver"/>
+                <span asp-validation-for="Receiver" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Subject" class="control-label"></label>
+                <input asp-for="Subject" class="form-control" value="@subject" id="subject" name="subject"/>
+                <span asp-validation-for="Subject" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Message" class="control-label"></label>
+                <input asp-for="Message" class="form-control" id="message" name="message"/>
+                <span asp-validation-for="Message" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-default" />
+            </div>
+        </form>
     </div>
+</div>
 
-    <div>
-        <a asp-controller="Emails" asp-action="Menu">Back to Email Menu</a>
-    </div>
+<div>
+    <a asp-controller="Emails" asp-action="Menu">Back to Email Menu</a>
+</div>
 
-<script type="text/javascript">
-    function validate() {
-        var usernames = @Json.Serialize(users);
-        var receiver = document.getElementById("receiver");
-        var numUsers = @users.Count;
-        var i;
-
-        for (i = 0; i < numUsers; i++) {
-            if (receiver.value == usernames[i]) {
-                receiver.style.backgroundColor = "LightGreen";
-                return true;
-            }
-        }
-
-        receiver.style.backgroundColor = "LightCoral";
-        alert("Invalid username, user not found");
-        return false;
-    }
-
-    function validateMsg() {
-        if (document.getElementById("message").value == null || document.getElementById("message").value == "") {
-            document.getElementById("message").style.backgroundColor = "LightCoral";
-            alert("Message field is required!");
-            return false;
-        }
-        document.getElementById("message").style.backgroundColor = "LightGreen";
-        return true;
-    }
-
-    function validateForm() {
-
-        var rightOrWrong = validate() && validateMsg();
-        var form = document.getElementById("form");
-
-        if (rightOrWrong) {
-            form.submit();
-            alert("The email was sent successfully!");
-            return true;
-        }
-
-        receiver.style.backgroundColor = "LightCoral";
-        alert("Invalid username, user not found");
-        return false;
-    }
-</script>
