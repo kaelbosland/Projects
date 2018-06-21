@@ -288,13 +288,7 @@ namespace Mosaic.Controllers
             ViewData["ClassTwo"] = new SelectList(items2, "ClassCode", "ClassCode", string.Empty);
             ViewData["Usernames"] = _service.ReturnAllUsernames();
 
-            var classOne = await _context.Class.SingleOrDefaultAsync(m => m.ClassCode == student.ClassOne);
-            var classTwo = await _context.Class.SingleOrDefaultAsync(m => m.ClassCode == student.ClassTwo);
-            if (classOne != null) { classOne.NumEnrolled++; _context.Update(classOne); } else { student.ClassOne = null; }
-            if (classTwo != null) { classTwo.NumEnrolled++; _context.Update(classTwo); } else { student.ClassTwo = null; }
-            student.Password = _service.EncryptPassword(student.Password);
-            _context.Add(student);
-            await _context.SaveChangesAsync();
+            
             ModelState.Clear();
             return RedirectToAction("LoginStudent");
         }
